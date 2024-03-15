@@ -11,7 +11,7 @@ class ThemeCreate(ThemeBase):
     pass
 
 
-class ThemeList(ThemeBase):
+class Theme(ThemeBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -29,7 +29,7 @@ class ProblemCreateUpdate(ProblemBase):
     theme_id: int
 
 
-class ProblemList(ProblemBase):
+class Problem(ProblemBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
