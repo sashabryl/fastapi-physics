@@ -1,5 +1,3 @@
-import asyncio
-
 from database import SessionLocal
 
 
