@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 
 from problems import schemas, models
 
@@ -59,3 +59,43 @@ async def delete_theme(db: AsyncSession, theme_id: int) -> schemas.Success:
     await db.delete(theme)
     await db.commit()
     return schemas.Success()
+
+
+async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Problem:
+    stmt = (
+        select(models.Problem)
+        .options(joinedload(models.Problem.theme))
+        .filter_by(id=problem_id)
+    )
+    result = await db.execute(stmt)
+    problem = result.scalars().first()
+    if not problem:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Problem with id {problem_id} isn't found(("
+        )
+    return problem
+
+
+async def create_problem(
+        db: AsyncSession,
+        problem_schema: schemas.ProblemBase
+) -> schemas.Problem:
+    stmt = (
+        insert(models.Problem)
+        .values(**problem_schema.model_dump())
+        .returning(models.Problem.id)
+    )
+    result = await db.execute(stmt)
+    await db.commit()
+    problem_id = result.scalars().first()
+    return await get_problem_by_id(db=db, problem_id=problem_id)
+
+
+async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
+    stmt = (
+        select(models.Problem)
+        .options(joinedload(models.Problem.theme))
+    )
+    themes = await db.execute(stmt)
+    return list(themes.scalars().all())

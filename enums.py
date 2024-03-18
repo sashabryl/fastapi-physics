@@ -2,6 +2,6 @@ from enum import Enum, auto
 
 
 class DifficultyLevel(Enum):
-    EASY = auto()
-    MEDIUM = auto()
-    HARD = auto()
+    EASY = "Easy"
+    MEDIUM = "Medium"
+    HARD = "Hard"

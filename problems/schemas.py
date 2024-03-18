@@ -19,9 +19,6 @@ class ProblemBase(BaseModel):
     description: str
     answer: str
     explanation: str
-
-
-class ProblemCreateUpdate(ProblemBase):
     theme_id: int
 
 
@@ -29,7 +26,16 @@ class Problem(ProblemBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    theme: ThemeBase
+    theme: Theme
+
+
+class ProblemList(ProblemBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    difficulty_level: DifficultyLevel
+    theme: Theme
 
 
 class Success(BaseModel):
