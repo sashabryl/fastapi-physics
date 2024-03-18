@@ -7,10 +7,6 @@ class ThemeBase(BaseModel):
     name: str
 
 
-class ThemeCreate(ThemeBase):
-    pass
-
-
 class Theme(ThemeBase):
     model_config = ConfigDict(from_attributes=True)
 
@@ -34,3 +30,7 @@ class Problem(ProblemBase):
 
     id: int
     theme: ThemeBase
+
+
+class Success(BaseModel):
+    success: bool = True
