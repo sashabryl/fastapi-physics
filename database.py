@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import DeclarativeBase
 
 import settings
 
@@ -13,4 +13,15 @@ engine = create_async_engine(
 )
 SessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+
+    repr_cols = tuple()
+
+    def __repr__(self):
+        cols = [
+            f"{col}={getattr(self, col)}"
+            for col in self.__table__.columns.keys()
+            if col in self.repr_cols
+        ]
+        return f"<{self.__class__.__name__}, {', '.join(cols)}>"

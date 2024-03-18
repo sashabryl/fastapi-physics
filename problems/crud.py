@@ -1,5 +1,6 @@
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from problems import schemas, models
 
@@ -13,6 +14,6 @@ async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeCreate) -> s
 
 
 async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
-    stmt = select(models.Theme)
+    stmt = select(models.Theme).options(selectinload(models.Theme.problems))
     themes = await db.execute(stmt)
-    return [theme for theme in themes.scalars().all()]
+    return list(themes.scalars().all())

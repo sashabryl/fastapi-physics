@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -17,6 +17,8 @@ class Theme(Base):
     name: Mapped[str]
 
     problems: Mapped[list["Problem"]] = relationship(back_populates="theme")
+
+    repr_cols = ("id", "name")
 
 
 class Problem(Base):
