@@ -17,3 +17,9 @@ async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
     stmt = select(models.Theme).options(selectinload(models.Theme.problems))
     themes = await db.execute(stmt)
     return list(themes.scalars().all())
+
+
+async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
+    stmt = select(models.Theme).options(selectinload(models.Theme.problems)).filter_by(id=theme_id)
+    theme = await db.execute(stmt)
+    return theme.scalars().first()
