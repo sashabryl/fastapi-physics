@@ -38,5 +38,9 @@ class ProblemList(ProblemBase):
     theme: Theme
 
 
+class ProblemAnswer(BaseModel):
+    answer: str
+
+
 class Success(BaseModel):
     success: bool = True

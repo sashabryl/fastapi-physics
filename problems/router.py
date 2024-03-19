@@ -59,3 +59,13 @@ async def get_one_problem(problem_id: int, db: AsyncSession = Depends(get_db)):
 @router_problem.get("/problems/", response_model=list[schemas.ProblemList])
 async def read_problems(db: AsyncSession = Depends(get_db)):
     return await crud.get_all_problems(db=db)
+
+
+@router_problem.post("/problems/{problem_id}/submit/", response_model=schemas.Success)
+async def submit_problem_solution(
+    problem_id: int,
+    answer: Annotated[schemas.ProblemAnswer, Depends()],
+    db: AsyncSession = Depends(get_db)
+):
+    result = await crud.check_problem_answer(db=db, problem_id=problem_id, answer=answer)
+    return schemas.Success(success=result)

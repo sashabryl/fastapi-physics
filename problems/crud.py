@@ -99,3 +99,14 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
     )
     themes = await db.execute(stmt)
     return list(themes.scalars().all())
+
+
+async def check_problem_answer(
+        db: AsyncSession,
+        problem_id: int,
+        answer: schemas.ProblemAnswer
+) -> bool:
+    problem = await get_problem_by_id(db=db, problem_id=problem_id)
+    if problem.answer == answer.answer:
+        return True
+    return False
