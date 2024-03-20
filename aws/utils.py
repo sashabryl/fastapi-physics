@@ -16,23 +16,18 @@ SUPPORTED_FILE_TYPES = {
     "image/jpeg": "jpg",
 }
 
-
-s3 = boto3.client(
-    "s3",
-    aws_secret_access_key_id=settings.AWS_SECRET_ACCESS_KEY,
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID
+session = boto3.Session(
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
 )
 
 BUCKET_NAME = settings.AWS_STORAGE_BUCKET_NAME
 
+s3 = session.resource("s3")
+bucket = s3.Bucket(BUCKET_NAME)
 
-def upload_image(file: UploadFile, directory: str):
-    if not file:
-        raise HTTPException(
-            status_code=400,
-            detail="No file found!"
-        )
 
+async def upload_image(file: UploadFile, directory: str):
     contents = await file.read()
     size = len(contents)
 
@@ -52,5 +47,7 @@ def upload_image(file: UploadFile, directory: str):
             )
         )
     file_name = os.path.join(directory, f"{uuid4()}.{SUPPORTED_FILE_TYPES[file_type]}")
-    await s3.put_object(contents=contents, bucket=BUCKET_NAME, key=file_name)
-    return {"file_name": file_name}
+    bucket.put_object(Body=contents, Key=file_name, ContentType=file_type)
+    url = settings.AWS_S3_CUSTOM_DOMAIN + file_name.replace("\\", "%5C")
+    return {"url": url}
+

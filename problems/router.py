@@ -1,10 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import settings
 from problems import schemas, crud
 from dependencies import get_db
+from aws import utils
 
 
 router_theme = APIRouter(tags=["Theme"])
@@ -71,3 +73,8 @@ async def submit_problem_solution(
     return schemas.Success(success=result)
 
 
+@router_problem.post("/upload-image/")
+async def upload_image(file: UploadFile):
+    directory = "esperanto"
+    result = await utils.upload_image(file=file, directory=directory)
+    return result.get("url")
