@@ -65,6 +65,7 @@ async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Proble
     stmt = (
         select(models.Problem)
         .options(joinedload(models.Problem.theme))
+        .options(selectinload(models.Problem.images))
         .filter_by(id=problem_id)
     )
     result = await db.execute(stmt)
@@ -96,6 +97,7 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
     stmt = (
         select(models.Problem)
         .options(joinedload(models.Problem.theme))
+        .options(selectinload(models.Problem.images))
     )
     themes = await db.execute(stmt)
     return list(themes.scalars().all())
@@ -110,3 +112,10 @@ async def check_problem_answer(
     if problem.answer == answer.answer:
         return True
     return False
+
+
+async def create_explanation_image(problem_id: int, image_url: str, db: AsyncSession) -> schemas.Success:
+    stmt = insert(models.ExplanationImage).values(problem_id=problem_id, image_url=image_url)
+    await db.execute(stmt)
+    await db.commit()
+    return schemas.Success()

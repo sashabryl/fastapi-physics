@@ -47,7 +47,9 @@ class ExplanationImage(Base):
 
     id: Mapped[intpk]
     image_url: Mapped[str]
-    problem_id: Mapped[int]
+    problem_id: Mapped[int] = mapped_column(
+        ForeignKey("problem.id", ondelete="CASCADE"),
+    )
 
     problem: Mapped["Problem"] = relationship(back_populates="images")
 

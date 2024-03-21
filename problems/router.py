@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, UploadFile, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import settings
@@ -73,8 +73,26 @@ async def submit_problem_solution(
     return schemas.Success(success=result)
 
 
-@router_problem.post("/upload-image/")
-async def upload_image(file: UploadFile):
-    directory = "esperanto"
-    result = await utils.upload_image(file=file, directory=directory)
-    return result.get("url")
+@router_problem.post("/problems/{problem_id}/upload-image/", response_model=schemas.Success)
+async def upload_explanation_image(
+        problem_id: int,
+        image: UploadFile,
+        db: Annotated[AsyncSession, Depends(get_db)]
+):
+    directory = "explanations"
+    image_url = await utils.upload_image(file=image, directory=directory)
+    result = await crud.create_explanation_image(
+        problem_id=problem_id, image_url=image_url, db=db
+    )
+    return result
+
+
+@router_problem.get(
+    "/problems/{problem_id}/explanation/",
+    response_model=schemas.ProblemExplanation
+)
+async def read_problem_explanation(
+        problem_id: int,
+        db: Annotated[AsyncSession, Depends(get_db)]
+):
+    return await crud.get_problem_by_id(db=db, problem_id=problem_id)

@@ -27,7 +27,7 @@ s3 = session.resource("s3")
 bucket = s3.Bucket(BUCKET_NAME)
 
 
-async def upload_image(file: UploadFile, directory: str):
+async def upload_image(file: UploadFile, directory: str) -> str:
     contents = await file.read()
     size = len(contents)
 
@@ -49,5 +49,5 @@ async def upload_image(file: UploadFile, directory: str):
     file_name = os.path.join(directory, f"{uuid4()}.{SUPPORTED_FILE_TYPES[file_type]}")
     bucket.put_object(Body=contents, Key=file_name, ContentType=file_type)
     url = settings.AWS_S3_CUSTOM_DOMAIN + file_name.replace("\\", "%5C")
-    return {"url": url}
+    return url
 
