@@ -36,3 +36,19 @@ class Problem(Base):
     )
 
     theme: Mapped["Theme"] = relationship(back_populates="problems")
+
+    images: Mapped[list["ExplanationImage"]] = relationship(back_populates="problem")
+
+    repr_cols = ("id", "name", "difficulty_level")
+
+
+class ExplanationImage(Base):
+    __tablename__ = "explanation_image"
+
+    id: Mapped[intpk]
+    image_url: Mapped[str]
+    problem_id: Mapped[int]
+
+    problem: Mapped["Problem"] = relationship(back_populates="images")
+
+    repr_cols = ("id", "problem_id")
