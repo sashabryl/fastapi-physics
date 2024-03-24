@@ -1,6 +1,10 @@
+import datetime
+
 import bcrypt
 import jwt
 from jwt import encode, decode
+
+import settings
 from settings import PUBLIC_KEY, PRIVATE_KEY
 
 
@@ -10,15 +14,23 @@ ALGORITHM = "RS256"
 def encode_jwt(
         payload: dict,
         key: str = PRIVATE_KEY,
-        algorithm: str = ALGORITHM
+        algorithm: str = ALGORITHM,
+        expires_min: int = settings.ACCESS_TOKEN_LIFETIME_MIN
 ) -> str:
+    to_encode = payload.copy()
+    now = datetime.datetime.utcnow()
+    exp = now + datetime.timedelta(minutes=expires_min)
+    to_encode.update(
+        exp=exp,
+        iat=now
+    )
     return encode(payload=payload, key=PRIVATE_KEY, algorithm=algorithm)
 
 
 def decode_jwt(
         token: str | bytes,
         key: str = PUBLIC_KEY,
-        algorithm: str = ALGORITHM
+        algorithm: str = ALGORITHM,
 ) -> dict:
     return jwt.decode(jwt=token, key=key, algorithms=[algorithm])
 

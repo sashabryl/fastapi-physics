@@ -14,3 +14,4 @@ AWS_S3_CUSTOM_DOMAIN = "https://physics-s3.s3.eu-north-1.amazonaws.com/"
 
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 PUBLIC_KEY = os.getenv("PUBLIC_KEY")
+ACCESS_TOKEN_LIFETIME_MIN = 2
