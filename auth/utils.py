@@ -1,3 +1,4 @@
+import bcrypt
 import jwt
 from jwt import encode, decode
 from settings import PUBLIC_KEY, PRIVATE_KEY
@@ -20,3 +21,7 @@ def decode_jwt(
         algorithm: str = ALGORITHM
 ) -> dict:
     return jwt.decode(jwt=token, key=key, algorithms=[algorithm])
+
+
+def hash_password(password: str) -> bytes:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt())
