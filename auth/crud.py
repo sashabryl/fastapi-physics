@@ -1,7 +1,8 @@
-from fastapi import HTTPException, Form
+from fastapi import HTTPException, Form, Depends
 from sqlalchemy import insert, select, column
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import dependencies
 from auth import schemas, models, utils
 from auth.utils import validate_password_registration, validate_password
 
@@ -81,10 +82,10 @@ async def create_user(db: AsyncSession, user_schema: schemas.UserBase) -> schema
 
 
 async def validate_auth_user(
-        db: AsyncSession,
+        db: AsyncSession = Depends(dependencies.get_db),
         username_or_email: str = Form(),
         password: str = Form(),
-):
+) -> schemas.User:
     auth_exc = HTTPException(401, "Invalid credentials")
     user = await get_user_by_email_or_username(db=db, email_or_username=username_or_email)
     if not user:
@@ -92,3 +93,4 @@ async def validate_auth_user(
     if not validate_password(password, user.hash_password):
         raise auth_exc
 
+    return user

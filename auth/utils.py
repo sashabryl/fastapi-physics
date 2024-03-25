@@ -1,20 +1,18 @@
 import datetime
 
 import bcrypt
-import jwt
 from fastapi import HTTPException
 from jwt import encode, decode
 
 import settings
-from settings import PUBLIC_KEY, PRIVATE_KEY
-
+from settings import PUBLIC_KEY_PATH, PRIVATE_KEY_PATH
 
 ALGORITHM = "RS256"
 
 
 def encode_jwt(
         payload: dict,
-        key: str = PRIVATE_KEY,
+        key: str = PRIVATE_KEY_PATH.read_text(),
         algorithm: str = ALGORITHM,
         expires_min: int = settings.ACCESS_TOKEN_LIFETIME_MIN
 ) -> str:
@@ -25,15 +23,15 @@ def encode_jwt(
         exp=exp,
         iat=now
     )
-    return encode(payload=payload, key=PRIVATE_KEY, algorithm=algorithm)
+    return encode(payload=payload, key=key, algorithm=algorithm)
 
 
 def decode_jwt(
         token: str | bytes,
-        key: str = PUBLIC_KEY,
+        key: str = PUBLIC_KEY_PATH.read_text(),
         algorithm: str = ALGORITHM,
 ) -> dict:
-    return jwt.decode(jwt=token, key=key, algorithms=[algorithm])
+    return decode(jwt=token, key=key, algorithms=[algorithm])
 
 
 def hash_password(password: str) -> bytes:

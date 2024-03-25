@@ -3,12 +3,23 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth import schemas, crud
+from auth import schemas, crud, utils
 from dependencies import get_db
 
 
 router_jwt = APIRouter(tags=["JWT"])
 router_user = APIRouter(tags=["User"])
+
+
+@router_jwt.post("/login/", response_model=schemas.TokenInfo)
+def issue_jwt_access_token(user: schemas.User = Depends(crud.validate_auth_user)):
+    jwt_payload = {
+        "sub": user.id,
+        "username": user.username,
+        "email": user.email
+    }
+    access_token = utils.encode_jwt(payload=jwt_payload)
+    return schemas.TokenInfo(type="Bearer", access_token=access_token)
 
 
 @router_user.post("/", response_model=schemas.UserRegisterResponse)

@@ -45,3 +45,8 @@ class UserFull(User):
 class UserLogin(BaseModel):
     username_or_email: str
     password: str
+
+
+class TokenInfo(BaseModel):
+    type: str
+    access_token: bytes
