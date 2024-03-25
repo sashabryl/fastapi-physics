@@ -2,6 +2,7 @@ import datetime
 
 import bcrypt
 import jwt
+from fastapi import HTTPException
 from jwt import encode, decode
 
 import settings
@@ -41,3 +42,18 @@ def hash_password(password: str) -> bytes:
 
 def validate_password(password: str, hashed_password: bytes) -> bool:
     return bcrypt.checkpw(password.encode(), hashed_password)
+
+
+def validate_password_registration(password1: str, password2: str) -> None | HTTPException:
+    if not password1 == password2:
+        raise HTTPException(400, "Passwords do not match.")
+
+    if not len(password1) >= 10:
+        raise HTTPException(400, "Make your password 10 or more characters long please.")
+
+    if password1.isalpha() or password1.isdigit():
+        raise HTTPException(400, "Password must contain both letters and digits.")
+
+    if not password1.isascii():
+        raise HTTPException(400, "Make sure your password consists of ascii characters only.")
+    return

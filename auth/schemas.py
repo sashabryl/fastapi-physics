@@ -8,6 +8,7 @@ class UserBase(BaseModel):
     password1: str
     password2: str
 
+
     @field_validator("username")
     @classmethod
     def validate_username(cls, v: str):
