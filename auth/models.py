@@ -7,8 +7,8 @@ class User(Base):
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str]
-    email: Mapped[str]
+    username: Mapped[str] = mapped_column(unique=True)
+    email: Mapped[str] = mapped_column(unique=True)
     score: Mapped[int] = mapped_column(default=0)
     is_superuser: Mapped[bool] = mapped_column(default=False)
     hash_password: Mapped[bytes]

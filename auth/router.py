@@ -11,7 +11,7 @@ router_jwt = APIRouter(tags=["JWT"])
 router_user = APIRouter(tags=["User"])
 
 
-@router_jwt.post("/register/", response_model=schemas.UserRegisterResponse)
+@router_user.post("/", response_model=schemas.UserRegisterResponse)
 async def create_user(
     user_schema: Annotated[schemas.UserBase, Depends()],
     db: AsyncSession = Depends(get_db)

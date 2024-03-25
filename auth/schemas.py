@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
+from fastapi import HTTPException
+from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
 
 
 class UserBase(BaseModel):
@@ -6,6 +7,22 @@ class UserBase(BaseModel):
     email: EmailStr
     password1: str
     password2: str
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: str):
+        if "@" in v:
+            raise HTTPException(400, "Username mustn't contain @. It's dangerous")
+        if " " in v:
+            raise HTTPException(400, "Username mustn't contain spaces. It's dangerous")
+
+        if not (v.isascii() and not v.isdigit() and not v.isalpha()):
+            raise HTTPException(
+                400,
+                "Please make sure that your username is made of "
+                "a combination of digits and ascii symbols."
+            )
+        return v
 
 
 class UserRegisterResponse(BaseModel):
