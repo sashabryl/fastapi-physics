@@ -27,3 +27,8 @@ async def read_users(db: AsyncSession = Depends(get_db)):
 @router_user.get("/{user_id}/", response_model=schemas.User)
 async def get_one_user(user_id: int, db: AsyncSession = Depends(get_db)):
     return await crud.get_user_by_id(db=db, user_id=user_id)
+
+
+@router_user.delete("/{user-id}/")
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    return await crud.delete_user_by_id(db=db, user_id=user_id)

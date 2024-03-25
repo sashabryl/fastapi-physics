@@ -18,3 +18,12 @@ class UserRegisterResponse(BaseModel):
 
 class User(UserRegisterResponse):
     score: int
+
+
+class UserFull(User):
+    hash_password: bytes
+
+
+class UserLogin(BaseModel):
+    username_or_email: str
+    password: str

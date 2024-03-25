@@ -48,3 +48,34 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
     if not user:
         raise HTTPException(404, f"User with id {user_id} is not found")
     return user
+
+
+async def get_user_by_email_or_username(
+        db: AsyncSession,
+        email_or_username: str | None
+) -> schemas.UserFull | None:
+
+    email_stmt = select(models.User).filter_by(email=email_or_username)
+    result = await db.execute(email_stmt)
+    email_user = result.scalar_one_or_none()
+
+    username_stmt = select(models.User).filter_by(username=email_or_username)
+    result = await db.execute(username_stmt)
+    username_user = result.scalar_one_or_none()
+
+    if email_user and username_user:
+        if email_user.id == username_user.id:
+            return email_user
+
+    if email_user and not username_user:
+        return email_user
+
+    if username_user and not email_user:
+        return username_user
+
+
+async def delete_user_by_id(db: AsyncSession, user_id: int):
+    user = await get_user_by_id(db=db, user_id=user_id)
+    await db.delete(user)
+    await db.commit()
+    return True
