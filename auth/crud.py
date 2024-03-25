@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import insert, column
+from sqlalchemy import insert, select, column
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import schemas, models, utils
@@ -32,4 +32,19 @@ async def create_user(db: AsyncSession, user_schema: schemas.UserBase) -> schema
     result = await db.execute(stmt)
     user = result.first()
     data = {"id": user[0], "username": user[1], "email": user[2]}
-    return data
+    return schemas.UserRegisterResponse(**data)
+
+
+async def get_all_users(db: AsyncSession) -> list[schemas.User]:
+    stmt = select(models.User)
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
+
+async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
+    stmt = select(models.User).filter_by(id=user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, f"User with id {user_id} is not found")
+    return user

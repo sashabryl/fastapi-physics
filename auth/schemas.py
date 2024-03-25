@@ -14,3 +14,7 @@ class UserRegisterResponse(BaseModel):
     id: int
     username: str
     email: EmailStr
+
+
+class User(UserRegisterResponse):
+    score: int
