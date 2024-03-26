@@ -23,7 +23,7 @@ def encode_jwt(
         exp=exp,
         iat=now
     )
-    return encode(payload=payload, key=key, algorithm=algorithm)
+    return encode(payload=to_encode, key=key, algorithm=algorithm)
 
 
 def decode_jwt(

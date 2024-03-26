@@ -1,10 +1,14 @@
 from fastapi import HTTPException, Form, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import insert, select, column
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import dependencies
 from auth import schemas, models, utils
 from auth.utils import validate_password_registration, validate_password
+
+
+http_bearer = HTTPBearer()
 
 
 async def get_all_users(db: AsyncSession) -> list[schemas.User]:
@@ -94,3 +98,16 @@ async def validate_auth_user(
         raise auth_exc
 
     return user
+
+
+async def get_current_user(
+    db: AsyncSession = Depends(dependencies.get_db),
+    credentials: HTTPAuthorizationCredentials = Depends(http_bearer)
+) -> schemas.User | None:
+    token = credentials.credentials
+    try:
+        data = utils.decode_jwt(token=token)
+        user = await get_user_by_id(user_id=data.get("sub"), db=db)
+        return user
+    except Exception as e:
+        raise HTTPException(403, f"Authentication error: {e}")

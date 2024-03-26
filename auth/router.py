@@ -43,3 +43,8 @@ async def get_one_user(user_id: int, db: AsyncSession = Depends(get_db)):
 @router_user.delete("/{user-id}/")
 async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
     return await crud.delete_user_by_id(db=db, user_id=user_id)
+
+
+@router_user.get("/profile/me/", response_model=schemas.User)
+async def user_me(user: schemas.User = Depends(crud.get_current_user)):
+    return user
