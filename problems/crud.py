@@ -3,7 +3,7 @@ from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
-import auth.crud
+from auth import crud as auth_crud, models as auth_models
 from problems import schemas, models
 
 
@@ -107,10 +107,17 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
 async def check_problem_answer(
         db: AsyncSession,
         problem_id: int,
+        user: auth_models.User,
         answer: schemas.ProblemAnswer,
 ) -> bool:
     problem = await get_problem_by_id(db=db, problem_id=problem_id)
     if problem.answer == answer.answer:
+        if user:
+            await auth_crud.increment_user_score(
+                db=db,
+                user=user,
+                problem_level=problem.difficulty_level.value.lower()
+            )
         return True
     return False
 

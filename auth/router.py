@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import schemas, crud, utils
@@ -47,4 +47,6 @@ async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
 
 @router_user.get("/profile/me/", response_model=schemas.User)
 async def user_me(user: schemas.User = Depends(crud.get_current_user)):
+    if not user:
+        raise HTTPException(401, "Authentication error")
     return user

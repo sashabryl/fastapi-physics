@@ -3,9 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import auth.crud
 from problems import schemas, crud
 from dependencies import get_db
 from aws import utils
+from auth.crud import get_current_user
 
 
 router_theme = APIRouter(tags=["Theme"])
@@ -66,9 +68,13 @@ async def read_problems(db: AsyncSession = Depends(get_db)):
 async def submit_problem_solution(
     problem_id: int,
     answer: Annotated[schemas.ProblemAnswer, Depends()],
+    user = Depends(auth.crud.get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    result = await crud.check_problem_answer(db=db, problem_id=problem_id, answer=answer)
+    result = await crud.check_problem_answer(
+        db=db, problem_id=problem_id, user=user, answer=answer
+    )
+
     return schemas.Success(success=result)
 
 

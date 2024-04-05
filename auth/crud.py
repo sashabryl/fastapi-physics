@@ -110,4 +110,15 @@ async def get_current_user(
         user = await get_user_by_id(user_id=data.get("sub"), db=db)
         return user
     except Exception as e:
-        raise HTTPException(401, f"Authentication error: {e}")
+        print(str(e))
+
+
+async def increment_user_score(db: AsyncSession, user: models.User, problem_level: str):
+    if problem_level == "easy":
+        user.score += 5
+    elif problem_level == "medium":
+        user.score += 10
+    elif problem_level == "hard":
+        user.score += 20
+    await db.commit()
+    await db.refresh(user)
