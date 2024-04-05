@@ -2,6 +2,7 @@ from fastapi import HTTPException, Form, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import insert, select, column
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 import dependencies
 from auth import schemas, models, utils
@@ -12,9 +13,9 @@ http_bearer = HTTPBearer()
 
 
 async def get_all_users(db: AsyncSession) -> list[schemas.User]:
-    stmt = select(models.User)
+    stmt = select(models.User).options(selectinload(models.User.completed_problems))
     result = await db.execute(stmt)
-    return result.scalars().all()
+    return result.unique().scalars().all()
 
 
 async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:

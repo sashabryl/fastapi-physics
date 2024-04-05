@@ -1,4 +1,4 @@
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from database import Base
 
@@ -12,5 +12,10 @@ class User(Base):
     score: Mapped[int] = mapped_column(default=0)
     is_superuser: Mapped[bool] = mapped_column(default=False)
     hash_password: Mapped[bytes]
+
+    completed_problems: Mapped[list["Problem"]] = relationship(
+        back_populates="completed_by",
+        secondary="problem_user"
+    )
 
     repr_cols = ("id", "username", "email", "is_superuser")

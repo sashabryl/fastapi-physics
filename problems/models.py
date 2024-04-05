@@ -36,8 +36,11 @@ class Problem(Base):
     )
 
     theme: Mapped["Theme"] = relationship(back_populates="problems")
-
     images: Mapped[list["ExplanationImage"]] = relationship(back_populates="problem")
+    completed_by: Mapped[list["User"]] = relationship(
+        back_populates="completed_problems",
+        secondary="problem_user"
+    )
 
     repr_cols = ("id", "name", "difficulty_level")
 
