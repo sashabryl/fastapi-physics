@@ -54,3 +54,16 @@ class ExplanationImage(Base):
     problem: Mapped["Problem"] = relationship(back_populates="images")
 
     repr_cols = ("id", "problem_id")
+
+
+class DoneProblem(Base):
+    __tablename__ = "problem_user"
+
+    problem_id: Mapped[int] = mapped_column(
+        ForeignKey("problem.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE"),
+        primary_key=True
+    )
