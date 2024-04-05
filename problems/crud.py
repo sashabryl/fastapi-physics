@@ -65,12 +65,13 @@ async def delete_theme(db: AsyncSession, theme_id: int) -> schemas.Success:
 async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Problem:
     stmt = (
         select(models.Problem)
+        .options(selectinload(models.Problem.completed_by))
         .options(joinedload(models.Problem.theme))
         .options(selectinload(models.Problem.images))
         .filter_by(id=problem_id)
     )
     result = await db.execute(stmt)
-    problem = result.scalars().first()
+    problem = result.unique().scalars().first()
     if not problem:
         raise HTTPException(
             status_code=404,
@@ -99,9 +100,10 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
         select(models.Problem)
         .options(joinedload(models.Problem.theme))
         .options(selectinload(models.Problem.images))
+        .options(selectinload(models.Problem.completed_by))
     )
     themes = await db.execute(stmt)
-    return list(themes.scalars().all())
+    return list(themes.unique().scalars().all())
 
 
 async def check_problem_answer(
@@ -113,11 +115,14 @@ async def check_problem_answer(
     problem = await get_problem_by_id(db=db, problem_id=problem_id)
     if problem.answer == answer.answer:
         if user:
-            await auth_crud.increment_user_score(
-                db=db,
-                user=user,
-                problem_level=problem.difficulty_level.value.lower()
-            )
+            if user not in problem.completed_by:
+                problem.completed_by.append(user)
+                await auth_crud.increment_user_score(
+                    db=db,
+                    user=user,
+                    problem_level=problem.difficulty_level.value.lower()
+                )
+                await db.commit()
         return True
     return False
 

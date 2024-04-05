@@ -19,7 +19,11 @@ async def get_all_users(db: AsyncSession) -> list[schemas.User]:
 
 
 async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
-    stmt = select(models.User).filter_by(id=user_id)
+    stmt = (
+        select(models.User)
+        .options(selectinload(models.User.completed_problems))
+        .filter_by(id=user_id)
+    )
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
     if not user:
@@ -28,13 +32,21 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> None | models.User:
-    stmt = select(models.User).filter_by(email=email)
+    stmt = (
+        select(models.User)
+        .options(selectinload(models.User.completed_problems))
+        .filter_by(email=email)
+    )
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
 
 async def get_user_by_username(db: AsyncSession, username: str) -> None | models.User:
-    stmt = select(models.User).filter_by(username=username)
+    stmt = (
+        select(models.User)
+        .options(selectinload(models.User.completed_problems))
+        .filter_by(username=username)
+    )
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
