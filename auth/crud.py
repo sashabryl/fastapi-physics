@@ -110,4 +110,4 @@ async def get_current_user(
         user = await get_user_by_id(user_id=data.get("sub"), db=db)
         return user
     except Exception as e:
-        raise HTTPException(403, f"Authentication error: {e}")
+        raise HTTPException(401, f"Authentication error: {e}")

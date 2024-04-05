@@ -14,11 +14,11 @@ def encode_jwt(
         payload: dict,
         key: str = PRIVATE_KEY_PATH.read_text(),
         algorithm: str = ALGORITHM,
-        expires_min: int = settings.ACCESS_TOKEN_LIFETIME_MIN
+        expires_sec: int = settings.ACCESS_TOKEN_LIFETIME_SEC
 ) -> str:
     to_encode = payload.copy()
     now = datetime.datetime.utcnow()
-    exp = now + datetime.timedelta(minutes=expires_min)
+    exp = now + datetime.timedelta(seconds=expires_sec)
     to_encode.update(
         exp=exp,
         iat=now

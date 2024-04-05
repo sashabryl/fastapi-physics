@@ -3,6 +3,7 @@ from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
+import auth.crud
 from problems import schemas, models
 
 
@@ -106,7 +107,7 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
 async def check_problem_answer(
         db: AsyncSession,
         problem_id: int,
-        answer: schemas.ProblemAnswer
+        answer: schemas.ProblemAnswer,
 ) -> bool:
     problem = await get_problem_by_id(db=db, problem_id=problem_id)
     if problem.answer == answer.answer:
