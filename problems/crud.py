@@ -83,12 +83,12 @@ async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Proble
 
 async def create_problem(
         db: AsyncSession,
-        problem_schema: schemas.ProblemBase,
+        problem_schema: schemas.ProblemCreate,
         author: auth_models.User
 ) -> schemas.Problem:
     if not author:
         raise HTTPException(401, "Authentication error")
-    if not author.score >= 100:
+    if not author.score >= 100 and not author.is_superuser:
         raise HTTPException(
             403,
             "Your score needs to be 100 or higher "
@@ -113,8 +113,9 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
         .options(selectinload(models.Problem.images))
         .options(selectinload(models.Problem.completed_by))
     )
-    themes = await db.execute(stmt)
-    return list(themes.unique().scalars().all())
+    problems = await db.execute(stmt)
+    return list(problems.unique().scalars().all())
+
 
 
 async def check_problem_answer(

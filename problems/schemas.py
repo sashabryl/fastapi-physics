@@ -21,6 +21,11 @@ class ProblemBase(BaseModel):
     theme_id: int
 
 
+class ProblemCreate(ProblemBase):
+    answer: str
+    explanation: str
+
+
 class Problem(ProblemBase):
     model_config = ConfigDict(from_attributes=True)
 
@@ -33,10 +38,8 @@ class ProblemList(ProblemBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    name: str
-    difficulty_level: DifficultyLevel
     theme: Theme
-
+    created_by: auth.schemas.User
 
 class ProblemAnswer(BaseModel):
     answer: str
