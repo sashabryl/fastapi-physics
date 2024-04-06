@@ -67,6 +67,7 @@ async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Proble
         select(models.Problem)
         .options(selectinload(models.Problem.completed_by))
         .options(joinedload(models.Problem.theme))
+        .options(joinedload(models.Problem.created_by))
         .options(selectinload(models.Problem.images))
         .filter_by(id=problem_id)
     )
@@ -82,11 +83,20 @@ async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Proble
 
 async def create_problem(
         db: AsyncSession,
-        problem_schema: schemas.ProblemBase
+        problem_schema: schemas.ProblemBase,
+        author: auth_models.User
 ) -> schemas.Problem:
+    if not author:
+        raise HTTPException(401, "Authentication error")
+    if not author.score >= 100:
+        raise HTTPException(
+            403,
+            "Your score needs to be 100 or higher "
+            "before you can create your own problems"
+        )
     stmt = (
         insert(models.Problem)
-        .values(**problem_schema.model_dump())
+        .values(**problem_schema.model_dump(), author_id=author.id)
         .returning(models.Problem.id)
     )
     result = await db.execute(stmt)
@@ -99,6 +109,7 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
     stmt = (
         select(models.Problem)
         .options(joinedload(models.Problem.theme))
+        .options(joinedload(models.Problem.created_by))
         .options(selectinload(models.Problem.images))
         .options(selectinload(models.Problem.completed_by))
     )
@@ -127,8 +138,23 @@ async def check_problem_answer(
     return False
 
 
-async def create_explanation_image(problem_id: int, image_url: str, db: AsyncSession) -> schemas.Success:
+async def create_explanation_image(
+        problem_id: int, image_url: str, db: AsyncSession
+) -> schemas.Success:
     stmt = insert(models.ExplanationImage).values(problem_id=problem_id, image_url=image_url)
     await db.execute(stmt)
+    await db.commit()
+    return schemas.Success()
+
+
+async def delete_problem(
+        problem_id: int, user: auth_models.User, db: AsyncSession
+) -> schemas.Success:
+    if not user:
+        raise HTTPException(401, "Authentication error")
+    if not user.is_superuser:
+        raise HTTPException(403, "You do not have permission to do this")
+    problem = await get_problem_by_id(db=db, problem_id=problem_id)
+    await db.delete(problem)
     await db.commit()
     return schemas.Success()

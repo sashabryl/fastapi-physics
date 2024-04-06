@@ -18,4 +18,8 @@ class User(Base):
         secondary="problem_user"
     )
 
+    created_problems: Mapped[list["Problem"]] = relationship(
+        back_populates="created_by"
+    )
+
     repr_cols = ("id", "username", "email", "is_superuser")

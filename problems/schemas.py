@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
+import auth.schemas
 from enums import DifficultyLevel
 
 
@@ -25,6 +26,7 @@ class Problem(ProblemBase):
 
     id: int
     theme: Theme
+    created_by: auth.schemas.User
 
 
 class ProblemList(ProblemBase):

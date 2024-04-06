@@ -49,9 +49,10 @@ async def delete_theme(theme_id: int, db: AsyncSession = Depends(get_db)):
 @router_problem.post("/problems/", response_model=schemas.Problem)
 async def create_problem(
         problem_schema: Annotated[schemas.ProblemBase, Depends()],
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        author = Depends(auth.crud.get_current_user)
 ):
-    return await crud.create_problem(db=db, problem_schema=problem_schema)
+    return await crud.create_problem(db=db, problem_schema=problem_schema, author=author)
 
 
 @router_problem.get("/problems/{problem_id}/", response_model=schemas.Problem)
@@ -101,3 +102,12 @@ async def read_problem_explanation(
         db: Annotated[AsyncSession, Depends(get_db)]
 ):
     return await crud.get_problem_by_id(db=db, problem_id=problem_id)
+
+
+@router_problem.delete("/problems/{problem_id}/", response_model=schemas.Success)
+async def delete_problem(
+        problem_id: int,
+        db: AsyncSession = Depends(get_db),
+        user = Depends(auth.crud.get_current_user)
+):
+    return await crud.delete_problem(problem_id=problem_id, db=db, user=user)

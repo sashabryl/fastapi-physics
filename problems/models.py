@@ -34,9 +34,16 @@ class Problem(Base):
         ForeignKey("theme.id", ondelete="SET NULL"),
         nullable=True
     )
+    author_id: Mapped[int | None] = mapped_column(
+        ForeignKey("user.id", ondelete="SET NULL")
+    )
 
     theme: Mapped["Theme"] = relationship(back_populates="problems")
-    images: Mapped[list["ExplanationImage"]] = relationship(back_populates="problem")
+    created_by: Mapped["User"] = relationship(back_populates="created_problems")
+    images: Mapped[list["ExplanationImage"]] = relationship(
+        back_populates="problem",
+        cascade="all, delete"
+    )
     completed_by: Mapped[list["User"]] = relationship(
         back_populates="completed_problems",
         secondary="problem_user"
@@ -50,8 +57,9 @@ class ExplanationImage(Base):
 
     id: Mapped[intpk]
     image_url: Mapped[str]
-    problem_id: Mapped[int] = mapped_column(
-        ForeignKey("problem.id", ondelete="CASCADE"),
+    problem_id: Mapped[int | None] = mapped_column(
+        ForeignKey("problem.id", ondelete="SET NULL"),
+        nullable=True
     )
 
     problem: Mapped["Problem"] = relationship(back_populates="images")

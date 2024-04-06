@@ -3,6 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import insert, select, column
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from sqlalchemy.orm.strategy_options import joinedload
 
 import dependencies
 from auth import schemas, models, utils
@@ -13,7 +14,11 @@ http_bearer = HTTPBearer()
 
 
 async def get_all_users(db: AsyncSession) -> list[schemas.User]:
-    stmt = select(models.User).options(selectinload(models.User.completed_problems))
+    stmt = (
+        select(models.User)
+        .options(selectinload(models.User.completed_problems))
+        .options(joinedload(models.User.created_problems))
+    )
     result = await db.execute(stmt)
     return result.unique().scalars().all()
 
@@ -22,10 +27,11 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
     stmt = (
         select(models.User)
         .options(selectinload(models.User.completed_problems))
+        .options(joinedload(models.User.created_problems))
         .filter_by(id=user_id)
     )
     result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
+    user = result.unique().scalar_one_or_none()
     if not user:
         raise HTTPException(404, f"User with id {user_id} is not found")
     return user
@@ -35,20 +41,22 @@ async def get_user_by_email(db: AsyncSession, email: str) -> None | models.User:
     stmt = (
         select(models.User)
         .options(selectinload(models.User.completed_problems))
+        .options(joinedload(models.User.created_problems))
         .filter_by(email=email)
     )
     result = await db.execute(stmt)
-    return result.scalar_one_or_none()
+    return result.unique().scalar_one_or_none()
 
 
 async def get_user_by_username(db: AsyncSession, username: str) -> None | models.User:
     stmt = (
         select(models.User)
         .options(selectinload(models.User.completed_problems))
+        .options(joinedload(models.User.created_problems))
         .filter_by(username=username)
     )
     result = await db.execute(stmt)
-    return result.scalar_one_or_none()
+    return result.unique().scalar_one_or_none()
 
 
 async def get_user_by_email_or_username(
