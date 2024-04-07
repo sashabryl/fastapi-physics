@@ -117,7 +117,6 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
     return list(problems.unique().scalars().all())
 
 
-
 async def check_problem_answer(
         db: AsyncSession,
         problem_id: int,
