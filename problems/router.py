@@ -86,10 +86,15 @@ async def submit_problem_solution(
 async def upload_explanation_images(
         problem_id: int,
         images: list[UploadFile],
-        db: Annotated[AsyncSession, Depends(get_db)]
+        db: Annotated[AsyncSession, Depends(get_db)],
+        user = Depends(auth.crud.get_current_user)
 ):
-    await crud.get_problem_by_id(db=db, problem_id=problem_id)  # see if the problem exists
-    print(images)
+    if not user:
+        raise HTTPException(401, "Authentication error")
+    problem = await crud.get_problem_by_id(db=db, problem_id=problem_id)
+    if not user == problem.created_by:
+        raise HTTPException(403, "You cannot do this, I'm sorry")
+
     directory = "explanations"
     for image in images:
         image_url = await utils.upload_image(file=image, directory=directory)
