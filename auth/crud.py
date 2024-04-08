@@ -17,6 +17,7 @@ async def get_all_users(db: AsyncSession) -> list[schemas.User]:
     stmt = (
         select(models.User)
         .options(selectinload(models.User.completed_problems))
+        .options(selectinload(models.User.comments))
         .options(joinedload(models.User.created_problems))
     )
     result = await db.execute(stmt)
@@ -27,6 +28,7 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
     stmt = (
         select(models.User)
         .options(selectinload(models.User.completed_problems))
+        .options(selectinload(models.User.comments))
         .options(joinedload(models.User.created_problems))
         .filter_by(id=user_id)
     )
@@ -41,6 +43,7 @@ async def get_user_by_email(db: AsyncSession, email: str) -> None | models.User:
     stmt = (
         select(models.User)
         .options(selectinload(models.User.completed_problems))
+        .options(selectinload(models.User.comments))
         .options(joinedload(models.User.created_problems))
         .filter_by(email=email)
     )
@@ -52,6 +55,7 @@ async def get_user_by_username(db: AsyncSession, username: str) -> None | models
     stmt = (
         select(models.User)
         .options(selectinload(models.User.completed_problems))
+        .options(selectinload(models.User.comments))
         .options(joinedload(models.User.created_problems))
         .filter_by(username=username)
     )

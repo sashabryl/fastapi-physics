@@ -66,6 +66,7 @@ async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Proble
     stmt = (
         select(models.Problem)
         .options(selectinload(models.Problem.completed_by))
+        .options(selectinload(models.Problem.comments))
         .options(joinedload(models.Problem.theme))
         .options(joinedload(models.Problem.created_by))
         .options(selectinload(models.Problem.images))
@@ -109,6 +110,7 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
     stmt = (
         select(models.Problem)
         .options(joinedload(models.Problem.theme))
+        .options(selectinload(models.Problem.comments))
         .options(joinedload(models.Problem.created_by))
         .options(selectinload(models.Problem.images))
         .options(selectinload(models.Problem.completed_by))
