@@ -1,3 +1,5 @@
+import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 import auth.schemas
@@ -14,32 +16,35 @@ class Theme(ThemeBase):
     id: int
 
 
-class ProblemBase(BaseModel):
+class ProblemCreate(BaseModel):
     name: str
     difficulty_level: DifficultyLevel
     description: str
     theme_id: int
-
-
-class ProblemCreate(ProblemBase):
     answer: str
     explanation: str
 
 
-class Problem(ProblemBase):
+class Problem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     theme: Theme
+    name: str
+    difficulty_level: DifficultyLevel
+    description: str
     created_by: auth.schemas.User
 
 
-class ProblemList(ProblemBase):
+class ProblemList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     theme: Theme
+    name: str
+    difficulty_level: DifficultyLevel
     created_by: auth.schemas.User
+
 
 class ProblemAnswer(BaseModel):
     answer: str
@@ -66,3 +71,13 @@ class ProblemExplanation(BaseModel):
     answer: str
     explanation: str
     images: list[ExplanationImage]
+
+
+class Comment(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    created_by: auth.schemas.User
+    problem: ProblemList
+    body: str
+    created_at: datetime.datetime

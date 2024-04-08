@@ -159,3 +159,24 @@ async def delete_problem(
     await db.delete(problem)
     await db.commit()
     return schemas.Success()
+
+
+async def create_comment(
+        problem_id: int,
+        user: auth_models.User,
+        body: str,
+        db: AsyncSession
+) -> schemas.Success:
+    problem = await get_problem_by_id(db=db, problem_id=problem_id)
+    stmt = insert(models.Comment).values(
+        author_id=user.id,
+        problem_id=problem_id,
+        body=body
+    )
+    result = await db.execute(stmt)
+    db.add(result.scalar_one())
+    await db.commit()
+    await db.refresh(result.scalar_one())
+    await db.refresh(problem)
+    return schemas.Success()
+
