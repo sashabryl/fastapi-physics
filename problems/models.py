@@ -1,3 +1,4 @@
+import datetime
 from typing import Annotated
 
 from sqlalchemy import ForeignKey
@@ -48,6 +49,7 @@ class Problem(Base):
         back_populates="completed_problems",
         secondary="problem_user"
     )
+    comments: Mapped["Comment"] = relationship(back_populates="problem")
 
     repr_cols = ("id", "name", "difficulty_level")
 
@@ -78,3 +80,23 @@ class DoneProblem(Base):
         ForeignKey("user.id", ondelete="CASCADE"),
         primary_key=True
     )
+
+
+class Comment(Base):
+    __tablename__ = "comment"
+
+    id: Mapped[intpk]
+
+    body: Mapped[str]
+    author_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE")
+    )
+    problem_id: Mapped[int] = mapped_column(
+        ForeignKey("problem.id", ondelete="CASCADE")
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow())
+
+    created_by: Mapped["User"] = relationship(back_populates="comments")
+    problem: Mapped["Problem"] = relationship(back_populates="comments")
+
+    repr_cols = ("id", "created_at")

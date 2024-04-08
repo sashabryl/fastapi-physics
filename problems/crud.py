@@ -135,7 +135,8 @@ async def check_problem_answer(
                 )
                 await db.commit()
         return True
-    return False
+    else:
+        return False
 
 
 async def create_explanation_image(
