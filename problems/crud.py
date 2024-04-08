@@ -150,11 +150,9 @@ async def create_explanation_image(
 async def delete_problem(
         problem_id: int, user: auth_models.User, db: AsyncSession
 ) -> schemas.Success:
-    if not user:
-        raise HTTPException(401, "Authentication error")
-    if not user.is_superuser:
-        raise HTTPException(403, "You do not have permission to do this")
     problem = await get_problem_by_id(db=db, problem_id=problem_id)
+    if not user.is_superuser and not problem.created_by == user:
+        raise HTTPException(403, "You do not have permission to do this")
     await db.delete(problem)
     await db.commit()
     return schemas.Success()

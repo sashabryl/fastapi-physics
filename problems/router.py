@@ -121,4 +121,6 @@ async def delete_problem(
         db: AsyncSession = Depends(get_db),
         user = Depends(auth.crud.get_current_user)
 ):
+    if not user:
+        raise HTTPException(401, "Authentication error")
     return await crud.delete_problem(problem_id=problem_id, db=db, user=user)
