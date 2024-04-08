@@ -127,6 +127,15 @@ async def create_comment(
     return await crud.create_comment(problem_id=problem_id, body=body, user=user, db=db)
 
 
+@router_problem.get("/problems/{problem_id}/comments/", response_model=list[schemas.Comment])
+async def read_comments(
+        problem_id: int,
+        user = Depends(auth.crud.get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    return await crud.get_all_comments(problem_id=problem_id, db=db)
+
+
 @router_problem.delete("/problems/{problem_id}/", response_model=schemas.Success)
 async def delete_problem(
         problem_id: int,
@@ -136,3 +145,4 @@ async def delete_problem(
     if not user:
         raise HTTPException(401, "Authentication error")
     return await crud.delete_problem(problem_id=problem_id, db=db, user=user)
+

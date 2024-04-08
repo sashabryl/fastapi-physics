@@ -177,3 +177,15 @@ async def create_comment(
     await db.commit()
     await db.refresh(problem)
     return schemas.Success()
+
+
+async def get_all_comments(problem_id: int, db: AsyncSession) -> list[schemas.Comment]:
+    await get_problem_by_id(db=db, problem_id=problem_id)  # validate if it exists at all
+    stmt = (
+        select(models.Comment)
+        .options(joinedload(models.Comment.problem))
+        .options(joinedload(models.Comment.created_by))
+        .filter_by(problem_id=problem_id)
+    )
+    result = await db.execute(stmt)
+    return list(result.unique().scalars().all())
