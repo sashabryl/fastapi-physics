@@ -173,10 +173,7 @@ async def create_comment(
         problem_id=problem_id,
         body=body
     )
-    result = await db.execute(stmt)
-    db.add(result.scalar_one())
+    await db.execute(stmt)
     await db.commit()
-    await db.refresh(result.scalar_one())
     await db.refresh(problem)
     return schemas.Success()
-

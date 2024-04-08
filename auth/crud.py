@@ -4,6 +4,7 @@ from sqlalchemy import insert, select, column
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.orm.strategy_options import joinedload
+from starlette.requests import Request
 
 import dependencies
 from auth import schemas, models, utils
@@ -126,11 +127,12 @@ async def validate_auth_user(
 
 
 async def get_current_user(
+    request: Request,
     db: AsyncSession = Depends(dependencies.get_db),
-    credentials: HTTPAuthorizationCredentials = Depends(http_bearer)
 ) -> schemas.User | None:
-    token = credentials.credentials
     try:
+        credentials = await http_bearer(request)
+        token = credentials.credentials
         data = utils.decode_jwt(token=token)
         user = await get_user_by_id(user_id=data.get("sub"), db=db)
         return user
