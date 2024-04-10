@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
@@ -116,8 +116,11 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
         .options(selectinload(models.Problem.images))
         .options(selectinload(models.Problem.completed_by))
     )
-    problems = await db.execute(stmt)
-    return list(problems.unique().scalars().all())
+    result = await db.execute(stmt)
+    problems = list(result.unique().scalars().all())
+    for problem in problems:
+        problem.completions = len(problem.completed_by)
+    return problems
 
 
 async def check_problem_answer(
@@ -187,6 +190,7 @@ async def get_all_comments(problem_id: int, db: AsyncSession) -> list[schemas.Co
         .options(joinedload(models.Comment.problem))
         .options(joinedload(models.Comment.created_by))
         .filter_by(problem_id=problem_id)
+        .order_by(models.Comment.created_at.desc())
     )
     result = await db.execute(stmt)
     return list(result.unique().scalars().all())

@@ -37,6 +37,7 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
     user = result.unique().scalar_one_or_none()
     if not user:
         raise HTTPException(404, f"User with id {user_id} is not found")
+    user.completions = len(user.completed_problems)
     return user
 
 

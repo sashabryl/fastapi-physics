@@ -36,6 +36,7 @@ class UserRegisterResponse(BaseModel):
 
 class User(UserRegisterResponse):
     score: int
+    completions: int
 
 
 class UserFull(User):

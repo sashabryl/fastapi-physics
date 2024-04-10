@@ -45,6 +45,7 @@ class ProblemList(BaseModel):
     name: str
     difficulty_level: DifficultyLevel
     created_by: auth.schemas.User
+    completions: int
 
 
 class ProblemAnswer(BaseModel):
