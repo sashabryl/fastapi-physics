@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 import auth.schemas
 from enums import DifficultyLevel
@@ -83,3 +83,8 @@ class Comment(BaseModel):
     problem: ProblemList
     body: str
     created_at: datetime.datetime
+
+    @field_validator("created_at")
+    @classmethod
+    def validate_username(cls, v: datetime.datetime):
+        return v.strftime("%Y/%m/%d, %H:%M")
