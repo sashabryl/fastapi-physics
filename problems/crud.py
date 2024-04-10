@@ -79,6 +79,7 @@ async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Proble
             status_code=404,
             detail=f"Problem with id {problem_id} isn't found(("
         )
+    problem.completions = len(problem.completed_by)
     return problem
 
 
