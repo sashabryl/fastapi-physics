@@ -4,6 +4,7 @@ from typing import Annotated
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+import enums
 from enums import DifficultyLevel
 from database import Base
 
@@ -88,6 +89,8 @@ class Comment(Base):
     id: Mapped[intpk]
 
     body: Mapped[str]
+    likes: Mapped[int] = mapped_column(default=0)
+    dislikes: Mapped[int] = mapped_column(default=0)
     author_id: Mapped[int] = mapped_column(
         ForeignKey("user.id", ondelete="CASCADE")
     )
@@ -100,3 +103,12 @@ class Comment(Base):
     problem: Mapped["Problem"] = relationship(back_populates="comments")
 
     repr_cols = ("id", "created_at")
+
+
+class CommentReaction(Base):
+    __tablename__ = "comment_reaction"
+
+    id: Mapped[intpk]
+    comment_id: Mapped[int]
+    user_id: Mapped[int]
+    type: Mapped[enums.ReactionType]
