@@ -33,8 +33,9 @@ class Problem(BaseModel):
     name: str
     difficulty_level: DifficultyLevel
     description: str
-    created_by: auth.schemas.User
+    created_by: auth.schemas.UserRegisterResponse
     completions: int
+    comments_num: int
 
 
 class ProblemList(BaseModel):
@@ -44,7 +45,7 @@ class ProblemList(BaseModel):
     theme: Theme
     name: str
     difficulty_level: DifficultyLevel
-    created_by: auth.schemas.User
+    created_by: auth.schemas.UserRegisterResponse
     completions: int
 
 

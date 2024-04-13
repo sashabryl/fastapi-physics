@@ -3,12 +3,13 @@ from sqlalchemy import select, insert, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
+import auth.schemas
 import enums
 from auth import crud as auth_crud, models as auth_models
 from problems import schemas, models
 
 
-async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeBase) -> models.Theme:
+async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeBase) -> schemas.Theme:
     theme = models.Theme(**theme_schema.model_dump())
     db.add(theme)
     await db.commit()
@@ -16,7 +17,7 @@ async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeBase) -> mod
     return theme
 
 
-async def get_all_themes(db: AsyncSession) -> list[models.Theme]:
+async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
     stmt = (
         select(models.Theme)
         .options(
@@ -27,7 +28,7 @@ async def get_all_themes(db: AsyncSession) -> list[models.Theme]:
     return list(themes.scalars().all())
 
 
-async def get_theme_by_id(db: AsyncSession, theme_id: int) -> models.Theme:
+async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
     stmt = (
         select(models.Theme)
         .options(
@@ -48,7 +49,7 @@ async def update_theme(
         db: AsyncSession,
         theme_id: int,
         theme_schema: schemas.ThemeBase
-) -> models.Theme:
+) -> schemas.Theme:
     theme = await get_theme_by_id(db=db, theme_id=theme_id)
     theme.name = theme_schema.name
     await db.commit()
@@ -81,6 +82,7 @@ async def get_problem_by_id(db: AsyncSession, problem_id: int) -> models.Problem
             detail=f"Problem with id {problem_id} isn't found(("
         )
     problem.completions = len(problem.completed_by)
+    problem.comments_num = len(problem.comments) if problem.comments else 0
     return problem
 
 
@@ -88,7 +90,7 @@ async def create_problem(
         db: AsyncSession,
         problem_schema: schemas.ProblemCreate,
         author: auth_models.User
-) -> models.Problem:
+) -> schemas.Problem:
     if not author:
         raise HTTPException(401, "Authentication error")
     if not author.score >= 100 and not author.is_superuser:
@@ -108,7 +110,7 @@ async def create_problem(
     return await get_problem_by_id(db=db, problem_id=problem_id)
 
 
-async def get_all_problems(db: AsyncSession) -> list[models.ProblemList]:
+async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
     stmt = (
         select(models.Problem)
         .options(joinedload(models.Problem.theme))

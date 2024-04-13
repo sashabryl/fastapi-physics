@@ -130,7 +130,7 @@ async def validate_auth_user(
 async def get_current_user(
     request: Request,
     db: AsyncSession = Depends(dependencies.get_db),
-) -> schemas.User | None:
+) -> models.User | None:
     try:
         credentials = await http_bearer(request)
         token = credentials.credentials

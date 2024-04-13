@@ -150,3 +150,21 @@ async def delete_problem(
     return await crud.delete_problem(problem_id=problem_id, db=db, user=user)
 
 
+@router_problem.post(
+    "/problems/{problem_id}/comments/{comment_id}/like/",
+    response_model=schemas.Success
+)
+async def like_comment(
+        problem_id: int,
+        comment_id: int,
+        user = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    if not user:
+        raise HTTPException(401, "Authentication error")
+    if not user.score >= 20:
+        raise HTTPException(
+            403, "Your score needs to be 20 or higher before you can like anything"
+        )
+    comment = await crud.get_comment_by_id(comment_id=comment_id, db=db)
+    await crud.like_comment(comment=comment, user=user, db=db)
