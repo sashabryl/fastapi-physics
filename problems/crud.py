@@ -3,11 +3,12 @@ from sqlalchemy import select, insert, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
+import enums
 from auth import crud as auth_crud, models as auth_models
 from problems import schemas, models
 
 
-async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeBase) -> schemas.Theme:
+async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeBase) -> models.Theme:
     theme = models.Theme(**theme_schema.model_dump())
     db.add(theme)
     await db.commit()
@@ -15,7 +16,7 @@ async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeBase) -> sch
     return theme
 
 
-async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
+async def get_all_themes(db: AsyncSession) -> list[models.Theme]:
     stmt = (
         select(models.Theme)
         .options(
@@ -26,7 +27,7 @@ async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
     return list(themes.scalars().all())
 
 
-async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
+async def get_theme_by_id(db: AsyncSession, theme_id: int) -> models.Theme:
     stmt = (
         select(models.Theme)
         .options(
@@ -47,7 +48,7 @@ async def update_theme(
         db: AsyncSession,
         theme_id: int,
         theme_schema: schemas.ThemeBase
-) -> schemas.Theme:
+) -> models.Theme:
     theme = await get_theme_by_id(db=db, theme_id=theme_id)
     theme.name = theme_schema.name
     await db.commit()
@@ -62,7 +63,7 @@ async def delete_theme(db: AsyncSession, theme_id: int) -> schemas.Success:
     return schemas.Success()
 
 
-async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Problem:
+async def get_problem_by_id(db: AsyncSession, problem_id: int) -> models.Problem:
     stmt = (
         select(models.Problem)
         .options(selectinload(models.Problem.completed_by))
@@ -87,7 +88,7 @@ async def create_problem(
         db: AsyncSession,
         problem_schema: schemas.ProblemCreate,
         author: auth_models.User
-) -> schemas.Problem:
+) -> models.Problem:
     if not author:
         raise HTTPException(401, "Authentication error")
     if not author.score >= 100 and not author.is_superuser:
@@ -107,7 +108,7 @@ async def create_problem(
     return await get_problem_by_id(db=db, problem_id=problem_id)
 
 
-async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
+async def get_all_problems(db: AsyncSession) -> list[models.ProblemList]:
     stmt = (
         select(models.Problem)
         .options(joinedload(models.Problem.theme))
@@ -183,8 +184,7 @@ async def create_comment(
     return schemas.Success()
 
 
-async def get_all_comments(problem_id: int, db: AsyncSession) -> list[schemas.Comment]:
-    await get_problem_by_id(db=db, problem_id=problem_id)  # validate if it exists at all
+async def get_all_comments(problem_id: int, db: AsyncSession) -> list[models.Comment]:
     stmt = (
         select(models.Comment)
         .options(joinedload(models.Comment.problem))
@@ -194,3 +194,71 @@ async def get_all_comments(problem_id: int, db: AsyncSession) -> list[schemas.Co
     )
     result = await db.execute(stmt)
     return list(result.unique().scalars().all())
+
+
+async def get_comment_by_id(comment_id: int, db: AsyncSession) -> models.Comment | None:
+    stmt = (
+        select(models.Comment)
+        .options(joinedload(models.Comment.problem))
+        .options(joinedload(models.Comment.created_by))
+        .filter_by(id=comment_id)
+    )
+    result = await db.execute(stmt)
+    return result.unique().scalars().one_or_none()
+
+
+async def get_comment_reaction(
+        user_id: int, comment_id: int, db: AsyncSession
+) -> models.CommentReaction | None:
+        stmt = (
+            select(models.CommentReaction)
+            .options(joinedload(models.CommentReaction.comment_id))
+            .options(joinedload(models.CommentReaction.user_id))
+            .filter_by(user_id=user_id, comment_id=comment_id)
+        )
+        result = await db.execute(stmt)
+        return result.unique().scalars().one_or_none()
+
+
+async def create_comment_reaction(
+        user_id: int, comment_id: int, type: enums.ReactionType, db: AsyncSession
+) -> None:
+    stmt = (
+        insert(models.CommentReaction)
+        .values(user_id=user_id, comment_id=comment_id, type=type)
+    )
+    await db.execute(stmt)
+
+
+async def like_comment(
+        comment: models.Comment,
+        user: auth_models.User,
+        db: AsyncSession
+) -> None:
+    comment_reaction = await get_comment_reaction(
+        user_id=user.id, comment_id=comment.id, db=db
+    )
+    if not comment_reaction:
+        await create_comment_reaction(
+            user_id=user.id,
+            comment_id=comment.it,
+            type=enums.ReactionType.LIKE,
+            db=db
+
+        )
+        comment.likes += 1
+
+    if comment_reaction.type.value.lower() == "like":
+        return
+
+    if comment_reaction.type.value.lower() == "dislike":
+        await db.delete(comment_reaction)
+        await create_comment_reaction(
+            comment_id=comment.id,
+            user_id=user.id,
+            type=enums.ReactionType.LIKE,
+            db=db
+        )
+        comment.dislikes -= 1
+        comment.likes += 1
+        await db.commit()

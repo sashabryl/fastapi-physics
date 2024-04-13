@@ -133,7 +133,10 @@ async def read_comments(
         user = Depends(auth.crud.get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    return await crud.get_all_comments(problem_id=problem_id, db=db)
+    problem = await crud.get_problem_by_id(db=db, problem_id=problem_id)
+    if problem not in user.completed_problems:
+        raise HTTPException(403, "First complete this problem!")
+    return await crud.get_all_comments(problem_id=problem.id, db=db)
 
 
 @router_problem.delete("/problems/{problem_id}/", response_model=schemas.Success)
@@ -145,3 +148,5 @@ async def delete_problem(
     if not user:
         raise HTTPException(401, "Authentication error")
     return await crud.delete_problem(problem_id=problem_id, db=db, user=user)
+
+
