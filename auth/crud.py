@@ -22,7 +22,10 @@ async def get_all_users(db: AsyncSession) -> list[schemas.User]:
         .options(joinedload(models.User.created_problems))
     )
     result = await db.execute(stmt)
-    return result.unique().scalars().all()
+    users = result.unique().scalars().all()
+    for user in users:
+        user.completions = len(user.completed_problems)
+    return users
 
 
 async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
@@ -41,7 +44,7 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
     return user
 
 
-async def get_user_by_email(db: AsyncSession, email: str) -> None | models.User:
+async def get_user_by_email(db: AsyncSession, email: str) -> None | schemas.User:
     stmt = (
         select(models.User)
         .options(selectinload(models.User.completed_problems))
@@ -53,7 +56,7 @@ async def get_user_by_email(db: AsyncSession, email: str) -> None | models.User:
     return result.unique().scalar_one_or_none()
 
 
-async def get_user_by_username(db: AsyncSession, username: str) -> None | models.User:
+async def get_user_by_username(db: AsyncSession, username: str) -> None | schemas.User:
     stmt = (
         select(models.User)
         .options(selectinload(models.User.completed_problems))
@@ -130,7 +133,7 @@ async def validate_auth_user(
 async def get_current_user(
     request: Request,
     db: AsyncSession = Depends(dependencies.get_db),
-) -> models.User | None:
+) -> schemas.User | None:
     try:
         credentials = await http_bearer(request)
         token = credentials.credentials

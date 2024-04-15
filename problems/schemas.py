@@ -49,6 +49,14 @@ class ProblemList(BaseModel):
     completions: int
 
 
+class ProblemShort(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    difficulty_level: DifficultyLevel
+
+
 class ProblemAnswer(BaseModel):
     answer: str
 
@@ -80,8 +88,8 @@ class Comment(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    created_by: auth.schemas.User
-    problem: ProblemList
+    created_by: auth.schemas.UserRegisterResponse
+    problem: ProblemShort
     body: str
     created_at: datetime.datetime
     likes: int
@@ -89,5 +97,5 @@ class Comment(BaseModel):
 
     @field_validator("created_at")
     @classmethod
-    def validate_username(cls, v: datetime.datetime):
+    def validate_created_at(cls, v: datetime.datetime):
         return v.strftime("%Y/%m/%d, %H:%M")

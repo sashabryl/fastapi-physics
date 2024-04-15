@@ -64,7 +64,7 @@ async def delete_theme(db: AsyncSession, theme_id: int) -> schemas.Success:
     return schemas.Success()
 
 
-async def get_problem_by_id(db: AsyncSession, problem_id: int) -> models.Problem:
+async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Problem:
     stmt = (
         select(models.Problem)
         .options(selectinload(models.Problem.completed_by))
@@ -192,7 +192,7 @@ async def create_comment(
     return schemas.Success()
 
 
-async def get_all_comments(problem_id: int, db: AsyncSession) -> list[models.Comment]:
+async def get_all_comments(problem_id: int, db: AsyncSession) -> list[schemas.Comment]:
     stmt = (
         select(models.Comment)
         .options(joinedload(models.Comment.problem))
