@@ -257,10 +257,10 @@ async def like_comment(
         await db.refresh(comment)
         return
 
-    if comment_reaction.type.value.lower() == "like":
+    if comment_reaction.type.value == enums.ReactionType.LIKE:
         return
 
-    if comment_reaction.type.value.lower() == "dislike":
+    if comment_reaction.type.value == enums.ReactionType.DISLIKE:
         await db.delete(comment_reaction)
         await create_comment_reaction(
             comment_id=comment.id,
@@ -272,3 +272,38 @@ async def like_comment(
         comment.likes += 1
         await db.commit()
         await db.refresh(comment)
+
+
+async def dislike_comment(
+        comment: models.Comment,
+        user: auth_models.User,
+        db: AsyncSession
+) -> None:
+    comment_reaction = await get_comment_reaction(
+        user_id=user.id, comment_id=comment.id, db=db
+    )
+    if not comment_reaction:
+        await create_comment_reaction(
+            user_id=user.id,
+            comment_id=comment.id,
+            type=enums.ReactionType.DISLIKE
+        )
+        comment.dislikes += 1
+        await db.commit()
+        await db.refresh(comment)
+        return
+
+    if comment_reaction.type.value == enums.ReactionType.DISLIKE:
+        return
+
+    if comment_reaction.type.value == enums.ReactionType.LIKE:
+        await db.delete(comment_reaction)
+        await create_comment_reaction(
+            user_id=user.id,
+            comment_id=comment.id,
+            type=enums.ReactionType.DISLIKE,
+            db=db
+        )
+        await db.commit()
+        await db.refresh(comment)
+        return
