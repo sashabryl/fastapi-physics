@@ -84,6 +84,8 @@ class Comment(BaseModel):
     problem: ProblemList
     body: str
     created_at: datetime.datetime
+    likes: int
+    dislikes:int
 
     @field_validator("created_at")
     @classmethod

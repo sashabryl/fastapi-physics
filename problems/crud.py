@@ -82,7 +82,13 @@ async def get_problem_by_id(db: AsyncSession, problem_id: int) -> models.Problem
             detail=f"Problem with id {problem_id} isn't found(("
         )
     problem.completions = len(problem.completed_by)
-    problem.comments_num = len(problem.comments) if problem.comments else 0
+    if problem.comments:
+        problem.comments_num = (
+            len(problem.comments) if isinstance(problem.comments, list)
+            else len([problem.comments])
+        )
+    else:
+        problem.comments_num = 0
     return problem
 
 
@@ -214,8 +220,6 @@ async def get_comment_reaction(
 ) -> models.CommentReaction | None:
         stmt = (
             select(models.CommentReaction)
-            .options(joinedload(models.CommentReaction.comment_id))
-            .options(joinedload(models.CommentReaction.user_id))
             .filter_by(user_id=user_id, comment_id=comment_id)
         )
         result = await db.execute(stmt)
@@ -243,12 +247,15 @@ async def like_comment(
     if not comment_reaction:
         await create_comment_reaction(
             user_id=user.id,
-            comment_id=comment.it,
+            comment_id=comment.id,
             type=enums.ReactionType.LIKE,
             db=db
 
         )
         comment.likes += 1
+        await db.commit()
+        await db.refresh(comment)
+        return
 
     if comment_reaction.type.value.lower() == "like":
         return
@@ -264,3 +271,4 @@ async def like_comment(
         comment.dislikes -= 1
         comment.likes += 1
         await db.commit()
+        await db.refresh(comment)

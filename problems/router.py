@@ -168,3 +168,4 @@ async def like_comment(
         )
     comment = await crud.get_comment_by_id(comment_id=comment_id, db=db)
     await crud.like_comment(comment=comment, user=user, db=db)
+    return schemas.Success
