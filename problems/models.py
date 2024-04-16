@@ -101,6 +101,7 @@ class Comment(Base):
 
     created_by: Mapped["User"] = relationship(back_populates="comments")
     problem: Mapped["Problem"] = relationship(back_populates="comments")
+    responses: Mapped[list["CommentResponse"]] = relationship(back_populates="comments")
 
     repr_cols = ("id", "created_at")
 
@@ -112,3 +113,27 @@ class CommentReaction(Base):
     comment_id: Mapped[int]
     user_id: Mapped[int]
     type: Mapped[enums.ReactionType]
+    belongs_to: Mapped[enums.ReactionOwner] = mapped_column(nullable=True)
+
+    repr_cols = ("id", "type")
+
+
+class CommentResponse(Base):
+    __tablename__ = "comment_response"
+
+    id: Mapped[intpk]
+    author_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE")
+    )
+    comment_id: Mapped[int] = mapped_column(
+        ForeignKey("comment.id", ondelete="CASCADE")
+    )
+    body: Mapped[str]
+    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow())
+
+    created_by: Mapped[list["User"]] = relationship(back_populates="comment_responses")
+    comment: Mapped[list["Comment"]] = relationship(back_populates="responses")
+    likes: Mapped[int] = mapped_column(default=0)
+    dislikes: Mapped[int] = mapped_column(default=0)
+
+    repr_cols = ("id", "problem_id", "created_at")

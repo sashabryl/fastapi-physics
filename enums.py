@@ -10,3 +10,8 @@ class DifficultyLevel(Enum):
 class ReactionType(Enum):
     LIKE = "Like"
     DISLIKE = "Dislike"
+
+
+class ReactionOwner(Enum):
+    COMMENT = "Comment"
+    RESPONSE = "Response"

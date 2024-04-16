@@ -195,6 +195,7 @@ async def create_comment(
 async def get_all_comments(problem_id: int, db: AsyncSession) -> list[schemas.Comment]:
     stmt = (
         select(models.Comment)
+        .options(selectinload(models.Comment.responses))
         .options(joinedload(models.Comment.problem))
         .options(joinedload(models.Comment.created_by))
         .filter_by(problem_id=problem_id)
@@ -207,6 +208,7 @@ async def get_all_comments(problem_id: int, db: AsyncSession) -> list[schemas.Co
 async def get_comment_by_id(comment_id: int, db: AsyncSession) -> models.Comment | None:
     stmt = (
         select(models.Comment)
+        .options(selectinload(models.Comment.responses))
         .options(joinedload(models.Comment.problem))
         .options(joinedload(models.Comment.created_by))
         .filter_by(id=comment_id)
@@ -216,22 +218,38 @@ async def get_comment_by_id(comment_id: int, db: AsyncSession) -> models.Comment
 
 
 async def get_comment_reaction(
-        user_id: int, comment_id: int, db: AsyncSession
+        user_id: int,
+        comment_id: int,
+        belongs_to: enums.ReactionOwner,
+        db: AsyncSession
 ) -> models.CommentReaction | None:
         stmt = (
             select(models.CommentReaction)
-            .filter_by(user_id=user_id, comment_id=comment_id)
+            .filter_by(
+                user_id=user_id,
+                comment_id=comment_id,
+                belongs_to=belongs_to
+            )
         )
         result = await db.execute(stmt)
         return result.unique().scalars().one_or_none()
 
 
 async def create_comment_reaction(
-        user_id: int, comment_id: int, type: enums.ReactionType, db: AsyncSession
+        user_id: int,
+        comment_id: int,
+        type: enums.ReactionType,
+        belongs_to: enums.ReactionOwner,
+        db: AsyncSession
 ) -> None:
     stmt = (
         insert(models.CommentReaction)
-        .values(user_id=user_id, comment_id=comment_id, type=type)
+        .values(
+            user_id=user_id,
+            comment_id=comment_id,
+            type=type,
+            belongs_to=belongs_to
+        )
     )
     await db.execute(stmt)
 
@@ -242,15 +260,18 @@ async def like_comment(
         db: AsyncSession
 ) -> None:
     comment_reaction = await get_comment_reaction(
-        user_id=user.id, comment_id=comment.id, db=db
+        user_id=user.id,
+        comment_id=comment.id,
+        belongs_to=enums.ReactionOwner.COMMENT,
+        db=db
     )
     if not comment_reaction:
         await create_comment_reaction(
             user_id=user.id,
             comment_id=comment.id,
             type=enums.ReactionType.LIKE,
+            belongs_to=enums.ReactionOwner.COMMENT,
             db=db
-
         )
         comment.likes += 1
         await db.commit()
@@ -266,6 +287,7 @@ async def like_comment(
             comment_id=comment.id,
             user_id=user.id,
             type=enums.ReactionType.LIKE,
+            belongs_to=enums.ReactionOwner.COMMENT,
             db=db
         )
         comment.dislikes -= 1
@@ -280,14 +302,19 @@ async def dislike_comment(
         db: AsyncSession
 ) -> None:
     comment_reaction = await get_comment_reaction(
-        user_id=user.id, comment_id=comment.id, db=db
+        user_id=user.id,
+        comment_id=comment.id,
+        belongs_to=enums.ReactionOwner.COMMENT,
+        db=db
     )
 
     if not comment_reaction:
         await create_comment_reaction(
             user_id=user.id,
             comment_id=comment.id,
-            type=enums.ReactionType.DISLIKE
+            type=enums.ReactionType.DISLIKE,
+            belongs_to = enums.ReactionOwner.COMMENT,
+            db=db
         )
         comment.dislikes += 1
         await db.commit()
@@ -303,6 +330,7 @@ async def dislike_comment(
             user_id=user.id,
             comment_id=comment.id,
             type=enums.ReactionType.DISLIKE,
+            belongs_to=enums.ReactionOwner.COMMENT,
             db=db
         )
         comment.likes -= 1
