@@ -101,7 +101,7 @@ class Comment(Base):
 
     created_by: Mapped["User"] = relationship(back_populates="comments")
     problem: Mapped["Problem"] = relationship(back_populates="comments")
-    responses: Mapped[list["CommentResponse"]] = relationship(back_populates="comments")
+    responses: Mapped[list["CommentResponse"]] = relationship(back_populates="comment")
 
     repr_cols = ("id", "created_at")
 
