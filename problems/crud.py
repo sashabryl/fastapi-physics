@@ -338,3 +338,18 @@ async def dislike_comment(
         await db.commit()
         await db.refresh(comment)
         return
+
+
+async def create_comment_response(
+        body: str,
+        user: auth_models.User,
+        comment: models.Comment,
+        db: AsyncSession
+) -> schemas.Success:
+    stmt = insert(models.CommentResponse).values(
+        body=body, user_id=user.id, comment_id=comment.id
+    )
+    await db.execute(stmt)
+    await db.commit()
+    await db.refresh(comment)
+    return schemas.Success()
