@@ -369,3 +369,14 @@ async def get_all_comment_responses(
     )
     result = await db.execute(stmt)
     return list(result.unique().scalars().all())
+
+
+async def get_comment_response_by_id(response_id: int, db: AsyncSession) -> schemas.Comment:
+    stmt = (
+        select(models.CommentResponse)
+        .options(joinedload(models.CommentResponse.comment))
+        .options(joinedload(models.CommentResponse.created_by))
+        .filter_by(id=response_id)
+    )
+    result = await db.execute(stmt)
+    return result.unique().scalars().one_or_none()
