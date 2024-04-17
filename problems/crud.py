@@ -347,7 +347,7 @@ async def create_comment_response(
         db: AsyncSession
 ) -> schemas.Success:
     stmt = insert(models.CommentResponse).values(
-        body=body, user_id=user.id, comment_id=comment.id
+        body=body, author_id=user.id, comment_id=comment.id
     )
     await db.execute(stmt)
     await db.commit()

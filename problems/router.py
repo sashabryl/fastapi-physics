@@ -50,7 +50,7 @@ async def delete_theme(theme_id: int, db: AsyncSession = Depends(get_db)):
 async def create_problem(
         problem_schema: Annotated[schemas.ProblemCreate, Depends()],
         db: AsyncSession = Depends(get_db),
-        author = Depends(auth.crud.get_current_user)
+        author = Depends(get_current_user)
 ):
     return await crud.create_problem(db=db, problem_schema=problem_schema, author=author)
 
@@ -69,7 +69,7 @@ async def read_problems(db: AsyncSession = Depends(get_db)):
 async def submit_problem_solution(
     problem_id: int,
     answer: Annotated[schemas.ProblemAnswer, Depends()],
-    user = Depends(auth.crud.get_current_user),
+    user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     result = await crud.check_problem_answer(
@@ -87,7 +87,7 @@ async def upload_explanation_images(
         problem_id: int,
         images: list[UploadFile],
         db: Annotated[AsyncSession, Depends(get_db)],
-        user = Depends(auth.crud.get_current_user)
+        user = Depends(get_current_user)
 ):
     if not user:
         raise HTTPException(401, "Authentication error")
@@ -119,7 +119,7 @@ async def read_problem_explanation(
 async def create_comment(
         problem_id: int,
         body: str,
-        user = Depends(auth.crud.get_current_user),
+        user = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
     if not user:
@@ -130,7 +130,7 @@ async def create_comment(
 @router_problem.get("/problems/{problem_id}/comments/", response_model=list[schemas.Comment])
 async def read_comments(
         problem_id: int,
-        user = Depends(auth.crud.get_current_user),
+        user = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
     problem = await crud.get_problem_by_id(db=db, problem_id=problem_id)
@@ -143,7 +143,7 @@ async def read_comments(
 async def delete_problem(
         problem_id: int,
         db: AsyncSession = Depends(get_db),
-        user = Depends(auth.crud.get_current_user)
+        user = Depends(get_current_user)
 ):
     if not user:
         raise HTTPException(401, "Authentication error")
@@ -190,3 +190,20 @@ async def dislike_comment(
     comment = await crud.get_comment_by_id(comment_id=comment_id, db=db)
     await crud.dislike_comment(comment=comment, user=user, db=db)
     return schemas.Success
+
+
+@router_problem.post(
+    "/problems/{problem_id}/comments/{comment_id}/responses/",
+    response_model=schemas.Success
+)
+async def create_comment_response(
+    problem_id: int,
+    comment_id: int,
+    body: str,
+    user = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if not user:
+        raise HTTPException(401, "Authentication error")
+    comment = await crud.get_comment_by_id(comment_id=comment_id, db=db)
+    return await crud.create_comment_response(body=body, user=user, comment=comment, db=db)
