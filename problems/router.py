@@ -207,3 +207,16 @@ async def create_comment_response(
         raise HTTPException(401, "Authentication error")
     comment = await crud.get_comment_by_id(comment_id=comment_id, db=db)
     return await crud.create_comment_response(body=body, user=user, comment=comment, db=db)
+
+
+@router_problem.get(
+    "/problems/{problem_id}/comments/{comment_id}/responses/",
+    response_model=list[schemas.Comment]
+)
+async def read_comment_responses(
+        problem_id: int,
+        comment_id: int,
+        db: AsyncSession = Depends(get_db)
+):
+    comment = await crud.get_comment_by_id(comment_id=comment_id, db=db)
+    return await crud.get_all_comment_responses(comment=comment, db=db)
