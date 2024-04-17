@@ -231,7 +231,7 @@ async def read_comment_responses(
     "/problems/{problem_id}/comments/{comment_id}/responses/{response_id}/like/",
     response_model=schemas.Success
 )
-async def like_comment(
+async def like_comment_response(
         problem_id: int,
         comment_id: int,
         response_id: int,
@@ -246,6 +246,30 @@ async def like_comment(
         )
     comment_response = await crud.get_comment_response_by_id(response_id=response_id, db=db)
     await crud.like_comment(
+        comment=comment_response, comment_type=enums.ReactionOwner.RESPONSE, user=user, db=db
+    )
+    return schemas.Success
+
+
+@router_problem.post(
+    "/problems/{problem_id}/comments/{comment_id}/responses/{response_id}/dislike/",
+    response_model=schemas.Success
+)
+async def dislike_comment_response(
+        problem_id: int,
+        comment_id: int,
+        response_id: int,
+        user = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    if not user:
+        raise HTTPException(401, "Authentication error")
+    if not user.score >= 20:
+        raise HTTPException(
+            403, "Your score needs to be 20 or higher before you can like anything"
+        )
+    comment_response = await crud.get_comment_response_by_id(response_id=response_id, db=db)
+    await crud.dislike_comment(
         comment=comment_response, comment_type=enums.ReactionOwner.RESPONSE, user=user, db=db
     )
     return schemas.Success
