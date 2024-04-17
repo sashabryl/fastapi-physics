@@ -256,13 +256,14 @@ async def create_comment_reaction(
 
 async def like_comment(
         comment: models.Comment,
+        comment_type: enums.ReactionOwner,
         user: auth_models.User,
         db: AsyncSession
 ) -> None:
     comment_reaction = await get_comment_reaction(
         user_id=user.id,
         comment_id=comment.id,
-        belongs_to=enums.ReactionOwner.COMMENT,
+        belongs_to=comment_type,
         db=db
     )
     if not comment_reaction:
@@ -270,7 +271,7 @@ async def like_comment(
             user_id=user.id,
             comment_id=comment.id,
             type=enums.ReactionType.LIKE,
-            belongs_to=enums.ReactionOwner.COMMENT,
+            belongs_to=comment_type,
             db=db
         )
         comment.likes += 1
@@ -287,7 +288,7 @@ async def like_comment(
             comment_id=comment.id,
             user_id=user.id,
             type=enums.ReactionType.LIKE,
-            belongs_to=enums.ReactionOwner.COMMENT,
+            belongs_to=comment_type,
             db=db
         )
         comment.dislikes -= 1
@@ -298,13 +299,14 @@ async def like_comment(
 
 async def dislike_comment(
         comment: models.Comment,
+        comment_type: enums.ReactionOwner,
         user: auth_models.User,
         db: AsyncSession
 ) -> None:
     comment_reaction = await get_comment_reaction(
         user_id=user.id,
         comment_id=comment.id,
-        belongs_to=enums.ReactionOwner.COMMENT,
+        belongs_to=comment_type,
         db=db
     )
 
@@ -313,7 +315,7 @@ async def dislike_comment(
             user_id=user.id,
             comment_id=comment.id,
             type=enums.ReactionType.DISLIKE,
-            belongs_to = enums.ReactionOwner.COMMENT,
+            belongs_to=comment_type,
             db=db
         )
         comment.dislikes += 1
@@ -330,7 +332,7 @@ async def dislike_comment(
             user_id=user.id,
             comment_id=comment.id,
             type=enums.ReactionType.DISLIKE,
-            belongs_to=enums.ReactionOwner.COMMENT,
+            belongs_to=comment_type,
             db=db
         )
         comment.likes -= 1
@@ -362,6 +364,7 @@ async def get_all_comment_responses(
         select(models.CommentResponse)
         .options(joinedload(models.CommentResponse.comment))
         .options(joinedload(models.CommentResponse.created_by))
+        .filter_by(comment_id=comment.id)
         .order_by(models.CommentResponse.created_at.desc())
     )
     result = await db.execute(stmt)

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, UploadFile, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import auth.crud
+import enums
 from problems import schemas, crud
 from dependencies import get_db
 from aws import utils
@@ -167,7 +168,9 @@ async def like_comment(
             403, "Your score needs to be 20 or higher before you can like anything"
         )
     comment = await crud.get_comment_by_id(comment_id=comment_id, db=db)
-    await crud.like_comment(comment=comment, user=user, db=db)
+    await crud.like_comment(
+        comment=comment, comment_type=enums.ReactionOwner.COMMENT, user=user, db=db
+    )
     return schemas.Success
 
 
@@ -188,7 +191,9 @@ async def dislike_comment(
             403, "Your score needs to be 100 or higher before you can start complaining"
         )
     comment = await crud.get_comment_by_id(comment_id=comment_id, db=db)
-    await crud.dislike_comment(comment=comment, user=user, db=db)
+    await crud.dislike_comment(
+        comment=comment, comment_type=enums.ReactionOwner.COMMENT, user=user, db=db
+    )
     return schemas.Success
 
 
