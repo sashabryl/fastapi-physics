@@ -89,7 +89,6 @@ class Comment(BaseModel):
 
     id: int
     created_by: auth.schemas.UserRegisterResponse
-    problem: ProblemShort
     body: str
     created_at: datetime.datetime
     likes: int

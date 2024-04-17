@@ -353,3 +353,13 @@ async def create_comment_response(
     await db.commit()
     await db.refresh(comment)
     return schemas.Success()
+
+
+async def get_all_comment_responses(
+        comment: models.Comment, db: AsyncSession
+) -> list[schemas.Comment]:
+    stmt = (
+        select(models.CommentResponse)
+        .options(joinedload(models.CommentResponse.comment))
+        .optio
+    )

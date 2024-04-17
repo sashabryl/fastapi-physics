@@ -131,8 +131,8 @@ class CommentResponse(Base):
     body: Mapped[str]
     created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow())
 
-    created_by: Mapped[list["User"]] = relationship(back_populates="comment_responses")
-    comment: Mapped[list["Comment"]] = relationship(back_populates="responses")
+    created_by: Mapped["User"] = relationship(back_populates="comment_responses")
+    comment: Mapped["Comment"] = relationship(back_populates="responses")
     likes: Mapped[int] = mapped_column(default=0)
     dislikes: Mapped[int] = mapped_column(default=0)
 
