@@ -361,5 +361,8 @@ async def get_all_comment_responses(
     stmt = (
         select(models.CommentResponse)
         .options(joinedload(models.CommentResponse.comment))
-        .optio
+        .options(joinedload(models.CommentResponse.created_by))
+        .order_by(models.CommentResponse.created_at.desc())
     )
+    result = await db.execute(stmt)
+    return list(result.unique().scalars().all())
