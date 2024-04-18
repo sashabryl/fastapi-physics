@@ -116,7 +116,12 @@ async def create_problem(
     return await get_problem_by_id(db=db, problem_id=problem_id)
 
 
-async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
+async def get_all_problems(
+        offset: int,
+        limit: int,
+        theme_id: int,
+        db: AsyncSession
+) -> list[schemas.ProblemList]:
     stmt = (
         select(models.Problem)
         .options(joinedload(models.Problem.theme))
@@ -124,7 +129,11 @@ async def get_all_problems(db: AsyncSession) -> list[schemas.ProblemList]:
         .options(joinedload(models.Problem.created_by))
         .options(selectinload(models.Problem.images))
         .options(selectinload(models.Problem.completed_by))
+        .offset(offset)
+        .limit(limit)
     )
+    if theme_id is not None:
+        stmt = stmt.where(models.Problem.theme.has(models.Theme.id == theme_id))
     result = await db.execute(stmt)
     problems = list(result.unique().scalars().all())
     for problem in problems:

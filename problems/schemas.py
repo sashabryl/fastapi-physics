@@ -1,6 +1,8 @@
 import datetime
+from typing import TypeVar, Generic
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, Field
+from pydantic.v1.generics import GenericModel
 
 import auth.schemas
 from enums import DifficultyLevel
