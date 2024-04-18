@@ -66,9 +66,10 @@ async def read_problems(
         theme_id: int = None,
         offset: int = Query(0, ge=0),
         limit: int = Query(100, ge=0),
+        keywords: str = None,
         db: AsyncSession = Depends(get_db)
 ):
-    return await crud.get_all_problems(offset=offset, limit=limit, theme_id=theme_id, db=db)
+    return await crud.get_all_problems(offset=offset, limit=limit, theme_id=theme_id, keywords=keywords, db=db)
 
 
 @router_problem.post("/problems/{problem_id}/submit/", response_model=schemas.Success)

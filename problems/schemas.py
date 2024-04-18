@@ -47,6 +47,7 @@ class ProblemList(BaseModel):
     theme: Theme
     name: str
     difficulty_level: DifficultyLevel
+    description: str
     created_by: auth.schemas.UserRegisterResponse
     completions: int
 

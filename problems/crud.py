@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import select, insert, func
+from sqlalchemy import select, insert, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
@@ -120,6 +120,7 @@ async def get_all_problems(
         offset: int,
         limit: int,
         theme_id: int,
+        keywords: str,
         db: AsyncSession
 ) -> list[schemas.ProblemList]:
     stmt = (
@@ -134,6 +135,10 @@ async def get_all_problems(
     )
     if theme_id is not None:
         stmt = stmt.where(models.Problem.theme.has(models.Theme.id == theme_id))
+    if keywords is not None:
+        keywords_ls = keywords.split(" ")
+        clauses = [models.Problem.description.icontains(keyword) for keyword in keywords_ls]
+        stmt = stmt.where(or_(*clauses))
     result = await db.execute(stmt)
     problems = list(result.unique().scalars().all())
     for problem in problems:
