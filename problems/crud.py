@@ -49,6 +49,12 @@ async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
     return theme
 
 
+async def get_theme_by_name(name: str, db: AsyncSession) -> schemas.Theme | None:
+    stmt = select(models.Theme).options(selectinload(models.Theme.problems)).filter_by(name=name)
+    result = await db.execute(stmt)
+    return result.scalars().one_or_none()
+
+
 async def update_theme(
         db: AsyncSession,
         theme_id: int,

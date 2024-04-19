@@ -20,6 +20,9 @@ async def create_theme(
         theme_schema: Annotated[schemas.ThemeBase, Depends()],
         db: AsyncSession = Depends(get_db)
 ):
+    theme_with_same_name = await crud.get_theme_by_name(name=theme_schema.name, db=db)
+    if theme_with_same_name:
+        raise HTTPException(400, f"Theme with name {theme_schema.name} already exists!")
     return await crud.create_theme(db=db, theme_schema=theme_schema)
 
 
