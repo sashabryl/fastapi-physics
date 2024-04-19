@@ -15,7 +15,7 @@ class Theme(ThemeBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    problems_num = int
+    problems_num: int
 
 
 class ThemeShort(BaseModel):

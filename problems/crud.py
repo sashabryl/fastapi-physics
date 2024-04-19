@@ -28,6 +28,7 @@ async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
     themes = list(result.scalars().all())
     for theme in themes:
         theme.problems_num = len(theme.problems)
+    return themes
 
 
 async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
@@ -55,7 +56,7 @@ async def update_theme(
 ) -> schemas.Theme:
     theme = await get_theme_by_id(db=db, theme_id=theme_id)
     theme.name = theme_schema.name
-    theme.description = theme_schema
+    theme.description = theme_schema.description
     await db.commit()
     await db.refresh(theme)
     return theme
