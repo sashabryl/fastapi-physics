@@ -1,8 +1,6 @@
 import datetime
-from typing import TypeVar, Generic
 
-from pydantic import BaseModel, ConfigDict, field_validator, Field
-from pydantic.v1.generics import GenericModel
+from pydantic import BaseModel, ConfigDict, field_validator
 
 import auth.schemas
 from enums import DifficultyLevel
@@ -11,14 +9,13 @@ from enums import DifficultyLevel
 class ThemeBase(BaseModel):
     name: str
     description: str
-    resources: list[str]
 
 
 class Theme(ThemeBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    problems_num: int
+    problems_num = int
 
 
 class ThemeShort(BaseModel):

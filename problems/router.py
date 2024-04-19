@@ -23,7 +23,7 @@ async def create_theme(
     return await crud.create_theme(db=db, theme_schema=theme_schema)
 
 
-@router_theme.get("/themes/", )
+@router_theme.get("/themes/", response_model=list[schemas.Theme])
 async def read_themes(db: AsyncSession = Depends(get_db)):
     return await crud.get_all_themes(db=db)
 

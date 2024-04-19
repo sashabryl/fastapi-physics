@@ -18,7 +18,6 @@ class Theme(Base):
     id: Mapped[intpk]
     name: Mapped[str]
     description: Mapped[str] = mapped_column(nullable=True)
-    resources: Mapped[list[str]] = mapped_column(nullable=True)
 
     problems: Mapped[list["Problem"]] = relationship(back_populates="theme")
 
