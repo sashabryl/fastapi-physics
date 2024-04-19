@@ -15,7 +15,7 @@ router_theme = APIRouter(tags=["Theme"])
 router_problem = APIRouter(tags=["Problem"])
 
 
-@router_theme.post("/themes/", response_model=schemas.Theme)
+@router_theme.post("/themes/", response_model=schemas.Success)
 async def create_theme(
         theme_schema: Annotated[schemas.ThemeBase, Depends()],
         db: AsyncSession = Depends(get_db)

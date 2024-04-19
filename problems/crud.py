@@ -9,12 +9,12 @@ from auth import crud as auth_crud, models as auth_models
 from problems import schemas, models
 
 
-async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeBase) -> schemas.Theme:
+async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeBase) -> schemas.Success:
     theme = models.Theme(**theme_schema.model_dump())
     db.add(theme)
     await db.commit()
     await db.refresh(theme)
-    return theme
+    return schemas.Success()
 
 
 async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
@@ -24,8 +24,11 @@ async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
             selectinload(models.Theme.problems)
         )
     )
-    themes = await db.execute(stmt)
-    return list(themes.scalars().all())
+    result = await db.execute(stmt)
+    themes = list(result.scalars().all())
+    for theme in themes:
+        theme.problems_num = len(theme.problems)
+    return themes
 
 
 async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
@@ -42,6 +45,7 @@ async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
             status_code=404,
             detail=f"Problem with id {theme_id} isn't found(("
         )
+    theme.problems_num = len(theme.problems)
     return theme
 
 
@@ -52,6 +56,7 @@ async def update_theme(
 ) -> schemas.Theme:
     theme = await get_theme_by_id(db=db, theme_id=theme_id)
     theme.name = theme_schema.name
+    theme.description = theme_schema
     await db.commit()
     await db.refresh(theme)
     return theme

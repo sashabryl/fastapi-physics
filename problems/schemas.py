@@ -10,12 +10,22 @@ from enums import DifficultyLevel
 
 class ThemeBase(BaseModel):
     name: str
+    description: str
+    resources: list[str]
 
 
 class Theme(ThemeBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    problems_num: int
+
+
+class ThemeShort(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
 
 
 class ProblemCreate(BaseModel):
@@ -31,7 +41,7 @@ class Problem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    theme: Theme
+    theme: ThemeShort
     name: str
     difficulty_level: DifficultyLevel
     description: str
@@ -44,7 +54,7 @@ class ProblemList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    theme: Theme
+    theme: ThemeShort
     name: str
     difficulty_level: DifficultyLevel
     description: str
@@ -81,7 +91,7 @@ class ProblemExplanation(BaseModel):
     id: int
     name: str
     difficulty_level: DifficultyLevel
-    theme: Theme
+    theme: ThemeShort
     answer: str
     explanation: str
     images: list[ExplanationImage]
