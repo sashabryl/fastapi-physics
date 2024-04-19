@@ -16,8 +16,8 @@ class Theme(Base):
     __tablename__ = "theme"
 
     id: Mapped[intpk]
-    name: Mapped[str]
-    description: Mapped[str] = mapped_column(nullable=True)
+    name: Mapped[str] = mapped_column(unique=True)
+    description: Mapped[str] = mapped_column(nullable=False)
 
     problems: Mapped[list["Problem"]] = relationship(back_populates="theme")
 
