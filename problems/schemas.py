@@ -121,6 +121,7 @@ class QuestionList(BaseModel):
 
     id: int
     title: str
+    description: str
     theme: ThemeShort
     created_at: datetime.datetime
 

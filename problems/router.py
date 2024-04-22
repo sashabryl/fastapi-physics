@@ -297,3 +297,16 @@ async def create_question(
     return await crud.create_question(
         question_schema=question_schema, author_id=user.id, db=db
     )
+
+
+@router_question.get("/questions/", response_model=list[schemas.QuestionList])
+async def read_questions(
+        theme_id: int = None,
+        offset: int = Query(0, ge=0),
+        limit: int = Query(100, ge=0),
+        keywords: str = None,
+        db: AsyncSession = Depends(get_db)
+):
+    return await crud.get_all_questions(
+        offset=offset, limit=limit, theme_id=theme_id, keywords=keywords, db=db
+    )

@@ -431,7 +431,7 @@ async def get_all_questions(
         theme_id: int | None,
         keywords: str | None,
         db: AsyncSession
-):
+) -> list[schemas.QuestionList]:
     stmt = (
         select(models.Question)
         .options(joinedload(models.Question.created_by))
@@ -449,5 +449,5 @@ async def get_all_questions(
         stmt = stmt.where(or_(*clauses))
     result = await db.execute(stmt)
     questions = result.unique().scalars().all()
-    return questions
+    return list(questions)
 
