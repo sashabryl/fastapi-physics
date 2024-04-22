@@ -13,6 +13,7 @@ from auth.crud import get_current_user
 
 router_theme = APIRouter(tags=["Theme"])
 router_problem = APIRouter(tags=["Problem"])
+router_question = APIRouter(tags=["Question"])
 
 
 @router_theme.post("/themes/", response_model=schemas.Success)
