@@ -134,8 +134,8 @@ async def create_problem(
 async def get_all_problems(
         offset: int,
         limit: int,
-        theme_id: int,
-        keywords: str,
+        theme_id: int | None,
+        keywords: str | None,
         db: AsyncSession
 ) -> list[schemas.ProblemList]:
     stmt = (
@@ -423,3 +423,31 @@ async def create_question(
     await db.execute(stmt)
     await db.commit()
     return schemas.Success()
+
+
+async def get_all_questions(
+        offset: int,
+        limit: int,
+        theme_id: int | None,
+        keywords: str | None,
+        db: AsyncSession
+):
+    stmt = (
+        select(models.Question)
+        .options(joinedload(models.Question.created_by))
+        .options(joinedload(models.Question.theme))
+        .offset(offset)
+        .limit(limit)
+        .order_by(models.Question.created_at.desc())
+    )
+    if theme_id is not None:
+        stmt = stmt.filter_by(theme_id=theme_id)
+    if keywords is not None:
+        keywords_ls = keywords.split(" ")
+        clauses = [models.Question.description.icontains(keyword) for keyword in keywords_ls]
+        clauses.extend(models.Question.title.icontains(keyword) for keyword in keywords_ls)
+        stmt = stmt.where(or_(*clauses))
+    result = await db.execute(stmt)
+    questions = result.unique().scalars().all()
+    return questions
+
