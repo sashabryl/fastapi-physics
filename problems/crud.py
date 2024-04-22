@@ -409,3 +409,14 @@ async def get_comment_response_by_id(response_id: int, db: AsyncSession) -> sche
     )
     result = await db.execute(stmt)
     return result.unique().scalars().one_or_none()
+
+
+async def create_question(
+        question_schema: schemas.QuestionBase, db: AsyncSession
+) -> schemas.Success:
+    stmt = (
+        insert(models.Question).values(**question_schema.model_dump())
+    )
+    await db.execute(stmt)
+    await db.commit()
+    return schemas.Success()

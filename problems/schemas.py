@@ -108,3 +108,9 @@ class Comment(BaseModel):
     @classmethod
     def validate_created_at(cls, v: datetime.datetime):
         return v.strftime("%Y/%m/%d, %H:%M")
+
+
+class QuestionBase(BaseModel):
+    title: str
+    description: str
+    theme_id: int
