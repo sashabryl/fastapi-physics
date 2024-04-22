@@ -412,10 +412,13 @@ async def get_comment_response_by_id(response_id: int, db: AsyncSession) -> sche
 
 
 async def create_question(
-        question_schema: schemas.QuestionBase, db: AsyncSession
+        question_schema: schemas.QuestionBase,
+        author_id: int,
+        db: AsyncSession
 ) -> schemas.Success:
     stmt = (
-        insert(models.Question).values(**question_schema.model_dump())
+        insert(models.Question)
+        .values(**question_schema.model_dump(), author_id=author_id)
     )
     await db.execute(stmt)
     await db.commit()

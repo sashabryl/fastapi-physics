@@ -3,7 +3,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, UploadFile, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import auth.crud
 import enums
 from problems import schemas, crud
 from dependencies import get_db
@@ -283,3 +282,18 @@ async def dislike_comment_response(
         comment=comment_response, comment_type=enums.ReactionOwner.RESPONSE, user=user, db=db
     )
     return schemas.Success
+
+
+@router_question.post("/questions/", response_model=schemas.Success)
+async def create_question(
+        question_schema: Annotated[schemas.QuestionBase, Depends()],
+        user = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    if not user:
+        raise HTTPException(401, "Authentication error")
+    await crud.get_theme_by_id(db=db, theme_id=question_schema.theme_id)
+
+    return await crud.create_question(
+        question_schema=question_schema, author_id=user.id, db=db
+    )
