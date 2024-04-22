@@ -114,3 +114,17 @@ class QuestionBase(BaseModel):
     title: str
     description: str
     theme_id: int
+
+
+class QuestionList(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    title: str
+    theme: ThemeShort
+    created_at: datetime.datetime
+
+    @field_validator("created_at")
+    @classmethod
+    def validate_created_at(cls, v: datetime.datetime):
+        return v.strftime("%Y/%m/%d, %H:%M")
