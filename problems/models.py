@@ -20,8 +20,30 @@ class Theme(Base):
     description: Mapped[str] = mapped_column(nullable=False)
 
     problems: Mapped[list["Problem"]] = relationship(back_populates="theme")
+    questions: Mapped[list["Question"]] = relationship(back_populates="theme")
 
     repr_cols = ("id", "name")
+
+
+class Question(Base):
+    __tablename__ = "question"
+
+    id: Mapped[intpk]
+
+    title: Mapped[str]
+    description: Mapped[str]
+    theme_id: Mapped[int] = mapped_column(
+        ForeignKey("theme.id", ondelete="CASCADE")
+    )
+    author_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE")
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow())
+
+    theme: Mapped["Theme"] = relationship(back_populates="questions")
+    created_by: Mapped["User"] = relationship(back_populates="questions")
+
+    repr_cols = ("id", "title", "created_at")
 
 
 class Problem(Base):
