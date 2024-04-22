@@ -20,9 +20,8 @@ async def create_theme(db: AsyncSession, theme_schema: schemas.ThemeBase) -> sch
 async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
     stmt = (
         select(models.Theme)
-        .options(
-            selectinload(models.Theme.problems)
-        )
+        .options(selectinload(models.Theme.problems))
+        .options(selectinload(models.Theme.questions))
     )
     result = await db.execute(stmt)
     themes = list(result.scalars().all())
@@ -34,9 +33,9 @@ async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
 async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
     stmt = (
         select(models.Theme)
-        .options(
-            selectinload(models.Theme.problems)
-        ).filter_by(id=theme_id)
+        .options(selectinload(models.Theme.problems))
+        .options(selectinload(models.Theme.questions))
+        .filter_by(id=theme_id)
     )
     result = await db.execute(stmt)
     theme = result.scalars().first()
@@ -50,7 +49,12 @@ async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
 
 
 async def get_theme_by_name(name: str, db: AsyncSession) -> schemas.Theme | None:
-    stmt = select(models.Theme).options(selectinload(models.Theme.problems)).filter_by(name=name)
+    stmt = (
+        select(models.Theme)
+        .options(selectinload(models.Theme.problems))
+        .options(selectinload(models.Theme.questions))
+        .filter_by(name=name)
+    )
     result = await db.execute(stmt)
     return result.scalars().one_or_none()
 
