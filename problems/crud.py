@@ -481,3 +481,15 @@ async def create_question_response(
     await db.commit()
     return schemas.Success()
 
+
+async def get_all_question_responses(question_id: int, db: AsyncSession) -> list[schemas.Comment]:
+    stmt = (
+        select(models.QuestionResponse)
+        .options(joinedload(models.QuestionResponse.question))
+        .options(joinedload(models.QuestionResponse.created_by))
+        .filter_by(id=question_id)
+        .order_by(models.QuestionResponse.created_at)
+    )
+    result = await db.execute(stmt)
+    questions = result.unique().scalars().all()
+    return questions
