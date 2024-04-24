@@ -1,9 +1,8 @@
 from fastapi import HTTPException, Form, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from sqlalchemy import insert, select, column
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlalchemy.orm.strategy_options import joinedload
 from starlette.requests import Request
 
 import dependencies
@@ -22,6 +21,7 @@ async def get_all_users(db: AsyncSession) -> list[schemas.User]:
         .options(selectinload(models.User.comments))
         .options(selectinload(models.User.created_problems))
         .options(selectinload(models.User.questions))
+        .options(selectinload(models.User.question_responses))
     )
     result = await db.execute(stmt)
     users = result.unique().scalars().all()
@@ -38,6 +38,7 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> schemas.User:
         .options(selectinload(models.User.comments))
         .options(selectinload(models.User.questions))
         .options(selectinload(models.User.created_problems))
+        .options(selectinload(models.User.question_responses))
         .filter_by(id=user_id)
     )
     result = await db.execute(stmt)
@@ -56,6 +57,7 @@ async def get_user_by_email(db: AsyncSession, email: str) -> None | schemas.User
         .options(selectinload(models.User.comments))
         .options(selectinload(models.User.questions))
         .options(selectinload(models.User.created_problems))
+        .options(selectinload(models.User.question_responses))
         .filter_by(email=email)
     )
     result = await db.execute(stmt)
@@ -70,6 +72,7 @@ async def get_user_by_username(db: AsyncSession, username: str) -> None | schema
         .options(selectinload(models.User.questions))
         .options(selectinload(models.User.comments))
         .options(selectinload(models.User.created_problems))
+        .options(selectinload(models.User.question_responses))
         .filter_by(username=username)
     )
     result = await db.execute(stmt)

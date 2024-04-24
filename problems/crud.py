@@ -436,6 +436,7 @@ async def get_all_questions(
         select(models.Question)
         .options(joinedload(models.Question.created_by))
         .options(joinedload(models.Question.theme))
+        .options(selectinload(models.Question.responses))
         .offset(offset)
         .limit(limit)
         .order_by(models.Question.created_at.desc())
@@ -457,9 +458,13 @@ async def get_question_by_id(question_id: int, db: AsyncSession) -> schemas.Ques
         select(models.Question)
         .options(joinedload(models.Question.created_by))
         .options(joinedload(models.Question.theme))
+        .options(selectinload(models.Question.responses))
     )
     result = await db.execute(stmt)
     question = result.unique().scalars().first()
     if not question:
         raise HTTPException(404, f"Question with id {question_id} not found.")
     return question
+
+#
+# async def create_question_response(body: str, author_id: int, db: AsyncSession)
