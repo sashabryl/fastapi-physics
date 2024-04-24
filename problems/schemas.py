@@ -129,3 +129,7 @@ class QuestionList(BaseModel):
     @classmethod
     def validate_created_at(cls, v: datetime.datetime):
         return v.strftime("%Y/%m/%d, %H:%M")
+
+
+class Question(QuestionList):
+    created_by = auth.schemas.UserRegisterResponse
