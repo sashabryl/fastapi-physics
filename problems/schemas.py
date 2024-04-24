@@ -132,4 +132,4 @@ class QuestionList(BaseModel):
 
 
 class Question(QuestionList):
-    created_by = auth.schemas.UserRegisterResponse
+    created_by: auth.schemas.UserRegisterResponse

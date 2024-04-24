@@ -60,7 +60,7 @@ async def create_problem(
 
 
 @router_problem.get("/problems/{problem_id}/", response_model=schemas.Problem)
-async def get_one_problem(problem_id: int, db: AsyncSession = Depends(get_db)):
+async def read_one_problem(problem_id: int, db: AsyncSession = Depends(get_db)):
     return await crud.get_problem_by_id(db=db, problem_id=problem_id)
 
 
@@ -310,3 +310,8 @@ async def read_questions(
     return await crud.get_all_questions(
         offset=offset, limit=limit, theme_id=theme_id, keywords=keywords, db=db
     )
+
+
+@router_question.get("/questions/{question_id}/", response_model=schemas.Question)
+async def read_one_question(question_id: int, db: AsyncSession = Depends(get_db)):
+    return await crud.get_question_by_id(question_id=question_id, db=db)
