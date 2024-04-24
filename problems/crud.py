@@ -451,3 +451,15 @@ async def get_all_questions(
     questions = result.unique().scalars().all()
     return list(questions)
 
+
+async def get_question_by_id(question_id: int, db: AsyncSession) -> schemas.Question:
+    stmt = (
+        select(models.Question)
+        .options(joinedload(models.Question.created_by))
+        .options(joinedload(models.Question.theme))
+    )
+    result = await db.execute(stmt)
+    question = result.unique().scalars().first()
+    if not question:
+        raise HTTPException(404, f"Question with id {question_id} not found.")
+    return question
