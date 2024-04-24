@@ -315,3 +315,18 @@ async def read_questions(
 @router_question.get("/questions/{question_id}/", response_model=schemas.Question)
 async def read_one_question(question_id: int, db: AsyncSession = Depends(get_db)):
     return await crud.get_question_by_id(question_id=question_id, db=db)
+
+
+@router_question.post("/question/{question_id}/responses/", response_model=schemas.Success)
+async def create_question_response(
+        body: str,
+        question_id: int,
+        user = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    if not user:
+        raise HTTPException(401, "Authentication error")
+    if not user.score >= 30:
+        raise HTTPException(401, "Please go and complete some more problems first")
+    question = await crud.get_question_by_id(question_id=question_id, db=db)
+    return await crud.create_question_response(question=question, author=user, body=body, db=db)
