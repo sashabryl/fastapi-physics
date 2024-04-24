@@ -466,5 +466,18 @@ async def get_question_by_id(question_id: int, db: AsyncSession) -> schemas.Ques
         raise HTTPException(404, f"Question with id {question_id} not found.")
     return question
 
-#
-# async def create_question_response(body: str, author_id: int, db: AsyncSession)
+
+async def create_question_response(
+        body: str,
+        question: models.Question,
+        author: auth_models.User,
+        db: AsyncSession
+) -> schemas.Success:
+    stmt = (
+        insert(models.QuestionResponse)
+        .values(question_id=question.id, author_id=author.id, body=body)
+    )
+    await db.execute(stmt)
+    await db.commit()
+    return schemas.Success()
+
