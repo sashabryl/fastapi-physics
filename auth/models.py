@@ -30,5 +30,8 @@ class User(Base):
     questions: Mapped[list["Question"]] = relationship(
         back_populates="created_by"
     )
+    question_responses: Mapped[list["QuestionResponse"]] = relationship(
+        back_populates="created_by"
+    )
 
     repr_cols = ("id", "username", "email", "is_superuser")

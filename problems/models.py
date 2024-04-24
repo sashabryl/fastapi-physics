@@ -42,8 +42,26 @@ class Question(Base):
 
     theme: Mapped["Theme"] = relationship(back_populates="questions")
     created_by: Mapped["User"] = relationship(back_populates="questions")
+    responses: Mapped[list["QuestionResponse"]] = relationship(back_populates="question")
 
     repr_cols = ("id", "title", "created_at")
+
+
+class QuestionResponse(Base):
+    __tablename__ = "question_response"
+
+    id: Mapped[intpk]
+    body: Mapped[str]
+    likes: Mapped[int] = mapped_column(default=0)
+    dislikes: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow())
+    author_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"))
+    question_id: Mapped[int] = mapped_column(ForeignKey("question.id", ondelete="CASCADE"))
+
+    created_by: Mapped["User"] = relationship(back_populates="question_responses")
+    question: Mapped["Question"] = relationship(back_populates="responses")
+
+    repr_cols = ("id", "created_at", "question_id")
 
 
 class Problem(Base):
