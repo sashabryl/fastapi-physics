@@ -15,3 +15,4 @@ class ReactionType(Enum):
 class ReactionOwner(Enum):
     COMMENT = "Comment"
     RESPONSE = "Response"
+    QUESTION_RESPONSE = "QuestionResponse"
