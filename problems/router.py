@@ -330,3 +330,9 @@ async def create_question_response(
         raise HTTPException(401, "Please go and complete some more problems first")
     question = await crud.get_question_by_id(question_id=question_id, db=db)
     return await crud.create_question_response(question=question, author=user, body=body, db=db)
+
+
+@router_question.get("/questions/{question_id}/responses/", response_model=list[schemas.Comment])
+async def read_question_responses(question_id: int, db: AsyncSession = Depends(get_db)):
+    await crud.get_question_by_id(question_id=question_id, db=db)
+    return await crud.get_all_question_responses(question_id=question_id, db=db)
