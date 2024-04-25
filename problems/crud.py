@@ -493,3 +493,14 @@ async def get_all_question_responses(question_id: int, db: AsyncSession) -> list
     result = await db.execute(stmt)
     questions = result.unique().scalars().all()
     return questions
+
+
+async def get_question_response_by_id(question_response_id: int, db: AsyncSession) -> schemas.Comment:
+    stmt = (
+        select(models.QuestionResponse)
+        .options(joinedload(models.QuestionResponse.question))
+        .options(joinedload(models.QuestionResponse.created_by))
+        .filter_by(id=question_response_id)
+    )
+    result = await db.execute(stmt)
+    return result.unique().scalars().first()
