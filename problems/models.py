@@ -154,7 +154,7 @@ class CommentReaction(Base):
     comment_id: Mapped[int]
     user_id: Mapped[int]
     type: Mapped[enums.ReactionType]
-    belongs_to: Mapped[enums.ReactionOwner] = mapped_column(nullable=True)
+    belongs_to: Mapped[enums.ReactionOwner] = mapped_column(nullable=False)
 
     repr_cols = ("id", "type")
 

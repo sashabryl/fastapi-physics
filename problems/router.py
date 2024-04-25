@@ -338,3 +338,23 @@ async def read_question_responses(question_id: int, db: AsyncSession = Depends(g
     return await crud.get_all_question_responses(question_id=question_id, db=db)
 
 
+@router_question.post("/questions/{question_id}/responses/{response_id}/", response_model=schemas.Success)
+async def like_question_response(
+        question_id: int,
+        response_id: int,
+        user = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    if not user:
+        raise HTTPException(401, "Authentication error")
+    if not user.score >= 20:
+        raise HTTPException(403, f"First gain at least 20 scores.")
+    await crud.get_question_by_id(question_id=question_id, db=db)
+    question_response = await crud.get_question_response_by_id(question_response_id=response_id, db=db)
+    await crud.like_comment(
+        comment=question_response,
+        comment_type=enums.ReactionOwner.QUESTION_RESPONSE,
+        user=user,
+        db=db
+    )
+    return schemas.Success()
