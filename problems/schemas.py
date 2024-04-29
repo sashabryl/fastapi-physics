@@ -16,6 +16,7 @@ class Theme(ThemeBase):
 
     id: int
     problems_num: int
+    questions_num: int
 
 
 class ThemeShort(BaseModel):

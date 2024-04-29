@@ -27,6 +27,7 @@ async def get_all_themes(db: AsyncSession) -> list[schemas.Theme]:
     themes = list(result.scalars().all())
     for theme in themes:
         theme.problems_num = len(theme.problems)
+        theme.questions_num = len(theme.questions)
     return themes
 
 
@@ -45,6 +46,7 @@ async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
             detail=f"Problem with id {theme_id} isn't found(("
         )
     theme.problems_num = len(theme.problems)
+    theme.questions_num = len(theme.questions)
     return theme
 
 
