@@ -16,3 +16,5 @@ AWS_S3_CUSTOM_DOMAIN = "https://physics-s3.s3.eu-north-1.amazonaws.com/"
 PRIVATE_KEY_PATH: Path = BASE_DIR / "auth" / "certs" / "jwt-private.pem"
 PUBLIC_KEY_PATH: Path = BASE_DIR / "auth" / "certs" / "jwt-public.pem"
 ACCESS_TOKEN_LIFETIME_SEC = 7 * 86400
+
+MODE = os.getenv("MODE")
