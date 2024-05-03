@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import select, insert, func, or_
+from sqlalchemy import select, insert, func, or_, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
@@ -79,6 +79,12 @@ async def delete_theme(db: AsyncSession, theme_id: int) -> schemas.Success:
     await db.delete(theme)
     await db.commit()
     return schemas.Success()
+
+
+async def delete_all_themes(db: AsyncSession) -> None:
+    stmt = delete(models.Theme)
+    await db.execute(stmt)
+    await db.commit()
 
 
 async def get_problem_by_id(db: AsyncSession, problem_id: int) -> schemas.Problem:
