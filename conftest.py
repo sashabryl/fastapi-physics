@@ -1,13 +1,22 @@
+import asyncio
 from typing import AsyncIterator
 
+import nest_asyncio
 import pytest
 from httpx import AsyncClient, ASGITransport
 
+from database import SessionLocal
 from main import app
 from auth.utils import encode_jwt
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
+async def session():
+    async with SessionLocal() as session:
+        yield session
+
+
+@pytest.fixture(scope="session")
 def anyio_backend() -> str:
     return "asyncio"
 
