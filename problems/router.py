@@ -18,8 +18,13 @@ router_question = APIRouter(tags=["Question"])
 @router_theme.post("/themes/", response_model=schemas.Success)
 async def create_theme(
         theme_schema: Annotated[schemas.ThemeBase, Depends()],
+        user = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
+    if not user:
+        raise HTTPException(401, "Authentication errror")
+    if not user.is_superuser:
+        raise HTTPException(403, "Not allowed")
     theme_with_same_name = await crud.get_theme_by_name(name=theme_schema.name, db=db)
     if theme_with_same_name:
         raise HTTPException(400, f"Theme with name {theme_schema.name} already exists!")
@@ -46,7 +51,15 @@ async def update_theme(
 
 
 @router_theme.delete("/themes/{theme_id}/", response_model=schemas.Success)
-async def delete_theme(theme_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_theme(
+        theme_id: int,
+        db: AsyncSession = Depends(get_db),
+        user = Depends(get_current_user)
+):
+    if not user:
+        raise HTTPException(401, "Authentication errror")
+    if not user.is_superuser:
+        raise HTTPException(403, "Not allowed")
     return await crud.delete_theme(db=db, theme_id=theme_id)
 
 
@@ -120,8 +133,14 @@ async def upload_explanation_images(
 )
 async def read_problem_explanation(
         problem_id: int,
-        db: Annotated[AsyncSession, Depends(get_db)]
+        db: Annotated[AsyncSession, Depends(get_db)],
+        user = Depends(get_current_user)
 ):
+    problem = await crud.get_problem_by_id(problem_id=problem_id, db=db)
+    if not user:
+        raise HTTPException(401, "Authentication errror")
+    if not user in problem.completed_by:
+        raise HTTPException(403, "Complete the problem first")
     return await crud.get_problem_by_id(db=db, problem_id=problem_id)
 
 
