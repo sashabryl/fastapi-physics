@@ -44,9 +44,14 @@ async def read_one_theme(theme_id: int, db: AsyncSession = Depends(get_db)):
 @router_theme.put("/themes/{theme_id}/", response_model=schemas.Theme)
 async def update_theme(
         theme_id: int,
-        theme_schema: Annotated[schemas.ThemeBase, Depends()],
-        db: AsyncSession = Depends(get_db)
+        theme_schema: schemas.ThemeBase,
+        db: AsyncSession = Depends(get_db),
+        user = Depends(get_current_user)
 ):
+    if not user:
+        raise HTTPException(401, "Authentication error")
+    if not user.is_superuser:
+        raise HTTPException(403, "Not allowed")
     return await crud.update_theme(db=db, theme_id=theme_id, theme_schema=theme_schema)
 
 
