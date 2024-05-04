@@ -17,8 +17,8 @@ router_question = APIRouter(tags=["Question"])
 
 @router_theme.post("/themes/", response_model=schemas.Success)
 async def create_theme(
-        theme_schema: Annotated[schemas.ThemeBase, Depends()],
-        user = Depends(get_current_user),
+        theme_schema: schemas.ThemeBase,
+        user=Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
     if not user:
