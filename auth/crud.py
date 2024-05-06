@@ -131,7 +131,7 @@ async def validate_auth_user(
         username_or_email: str = Form(),
         password: str = Form(),
 ) -> schemas.User:
-    auth_exc = HTTPException(401, "Invalid credentials")
+    auth_exc = HTTPException(400, "Invalid credentials")
     user = await get_user_by_email_or_username(db=db, email_or_username=username_or_email)
     if not user:
         raise auth_exc
