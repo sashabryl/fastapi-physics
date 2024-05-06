@@ -94,3 +94,24 @@ async def test_user_login(
     json = {"username_or_email": username_or_email, "password": password}
     response = await client.post("/jwt/login/", data=json)
     assert response.status_code == status_code
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "user_id, username, status_code",
+    [
+        (1, "test_user", 200),
+        (2, "test_admin", 200),
+        (3, None, 404)
+    ]
+)
+async def test_read_one_user(
+    client: AsyncClient,
+    user_id: int,
+    username: str | None,
+    status_code: int
+):
+    response = await client.get(f"/users/{user_id}/")
+    assert response.status_code == status_code
+    if username is not None:
+        assert response.json().get("username") == username
