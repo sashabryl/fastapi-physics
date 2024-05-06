@@ -1,6 +1,8 @@
 import pytest
 from httpx import AsyncClient
 
+from auth.utils import encode_jwt
+
 
 @pytest.mark.anyio
 @pytest.mark.usefixtures("clear_users")
@@ -115,3 +117,28 @@ async def test_read_one_user(
     assert response.status_code == status_code
     if username is not None:
         assert response.json().get("username") == username
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "user_id, username, status_code",
+    [
+        (1, "test_user", 200),
+        (None, None, 401)
+    ]
+)
+async def test_user_me(
+    client: AsyncClient,
+    user_id: int | None,
+    username: str | None,
+    status_code: str
+):
+    headers = {}
+    if user_id is not None:
+        token = encode_jwt({"sub": user_id})
+        headers = {"Authorization": f"Bearer {token}"}
+    response = await client.get("/users/profile/me/", headers=headers)
+    assert response.status_code == status_code
+    if username is not None:
+        assert response.json().get("username") == username
+
