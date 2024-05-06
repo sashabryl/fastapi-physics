@@ -24,7 +24,7 @@ def issue_jwt_access_token(user: schemas.User = Depends(crud.validate_auth_user)
 
 @router_user.post("/", response_model=schemas.UserRegisterResponse)
 async def create_user(
-    user_schema: Annotated[schemas.UserBase, Depends()],
+    user_schema: schemas.UserBase,
     db: AsyncSession = Depends(get_db)
 ):
     return await crud.create_user(db=db, user_schema=user_schema)
