@@ -7,7 +7,6 @@ from auth.utils import encode_jwt
 from problems.schemas import ThemeBase
 
 
-@pytest.mark.anyio
 @pytest.mark.usefixtures("create_themes", "delete_themes")
 class TestTheme:
     @pytest.mark.anyio
