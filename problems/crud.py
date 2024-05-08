@@ -142,11 +142,11 @@ async def create_problem(
 
 
 async def get_all_problems(
-        offset: int,
-        limit: int,
-        theme_id: int | None,
-        keywords: str | None,
-        db: AsyncSession
+        db: AsyncSession,
+        offset: int = 0,
+        limit: int = 100,
+        theme_id: int | None = None,
+        keywords: str | None = None,
 ) -> list[schemas.ProblemList]:
     stmt = (
         select(models.Problem)

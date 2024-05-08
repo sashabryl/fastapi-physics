@@ -76,4 +76,23 @@ class TestProblem:
         response = await client.post("/problems/", json=json, headers=headers)
         assert response.status_code == status_code
 
-    @pytest.mark.anyio()
+    @pytest.mark.anyio
+    async def test_read_problems(self, client: AsyncClient):
+        response = await client.get("/problems/")
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+
+    @pytest.mark.anyio
+    @pytest.mark.parametrize("problem_id, status_code", [("real", 200), (-3, 404)])
+    async def test_read_one_problem(
+        self, client: AsyncClient, problem_id: str | int, status_code: int, session
+    ):
+        problems = []
+        if problem_id == "real":
+            problems = await crud.get_all_problems(db=session)
+            problem_id = problems[0].id
+        response = await client.get(f"/problems/{problem_id}/")
+        assert response.status_code == status_code
+        if problem_id == "real":
+            assert response.json().get("name") == problems[0].name
+
