@@ -68,9 +68,9 @@ async def delete_theme(
     return await crud.delete_theme(db=db, theme_id=theme_id)
 
 
-@router_problem.post("/problems/", response_model=schemas.Problem)
+@router_problem.post("/problems/", response_model=schemas.Success)
 async def create_problem(
-        problem_schema: Annotated[schemas.ProblemCreate, Depends()],
+        problem_schema: schemas.ProblemCreate,
         db: AsyncSession = Depends(get_db),
         author = Depends(get_current_user)
 ):

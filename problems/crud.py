@@ -43,7 +43,7 @@ async def get_theme_by_id(db: AsyncSession, theme_id: int) -> schemas.Theme:
     if not theme:
         raise HTTPException(
             status_code=404,
-            detail=f"Problem with id {theme_id} isn't found(("
+            detail=f"Theme with id {theme_id} isn't found(("
         )
     theme.problems_num = len(theme.problems)
     theme.questions_num = len(theme.questions)
@@ -82,6 +82,7 @@ async def delete_theme(db: AsyncSession, theme_id: int) -> schemas.Success:
 
 
 async def delete_all_themes(db: AsyncSession) -> None:
+    """This is for testing only"""
     stmt = delete(models.Theme)
     await db.execute(stmt)
     await db.commit()
@@ -119,7 +120,7 @@ async def create_problem(
         db: AsyncSession,
         problem_schema: schemas.ProblemCreate,
         author: auth_models.User
-) -> schemas.Problem:
+) -> schemas.Success:
     if not author:
         raise HTTPException(401, "Authentication error")
     if not author.score >= 100 and not author.is_superuser:
@@ -128,15 +129,16 @@ async def create_problem(
             "Your score needs to be 100 or higher "
             "before you can create your own problems"
         )
+    theme = await get_theme_by_id(db=db, theme_id=problem_schema.theme_id)
+    if not theme:
+        raise HTTPException(400, f"Theme with id {problem_schema.theme_id} does not exist!")
     stmt = (
         insert(models.Problem)
         .values(**problem_schema.model_dump(), author_id=author.id)
-        .returning(models.Problem.id)
     )
-    result = await db.execute(stmt)
+    await db.execute(stmt)
     await db.commit()
-    problem_id = result.scalars().first()
-    return await get_problem_by_id(db=db, problem_id=problem_id)
+    return schemas.Success()
 
 
 async def get_all_problems(

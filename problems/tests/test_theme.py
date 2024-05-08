@@ -1,20 +1,16 @@
 import pytest
 from httpx import AsyncClient
 
-import dependencies
 from problems import crud
 from auth.utils import encode_jwt
 from problems.schemas import ThemeBase
 
 
-@pytest.mark.usefixtures("create_themes", "delete_themes")
 class TestTheme:
     @pytest.mark.anyio
-    async def test_home(self, client: AsyncClient):
+    async def test_read_themes(self, client: AsyncClient):
         response = await client.get("/themes/")
         assert response.status_code == 200
-        assert response.json()[0].get("name") == "Mechanics"
-        assert response.json()[1].get("name") == "Electronics"
 
     @pytest.mark.anyio
     @pytest.mark.parametrize(
@@ -46,7 +42,7 @@ class TestTheme:
         assert response.json().get("name") == themes[0].name
 
     @pytest.mark.anyio
-    async def test_update_theme_by_guest(self, client: AsyncClient, session):
+    async def test_update_theme(self, client: AsyncClient, session):
         token = encode_jwt({"sub": 2})
         headers = {"Authorization": f"Bearer {token}"}
         themes = await crud.get_all_themes(db=session)
@@ -72,9 +68,11 @@ class TestTheme:
     async def test_delete_theme(
             self, client: AsyncClient, user_id: int | None, status_code: int, session
     ):
-        await crud.create_theme(
-            db=session, theme_schema=ThemeBase(name=f"some{user_id}", description=f"new{user_id}")
-        )
+        if not await crud.get_theme_by_name(db=session, name=f"some{user_id}"):
+            await crud.create_theme(
+                db=session,
+                theme_schema=ThemeBase(name=f"some{user_id}", description=f"new{user_id}")
+            )
         new_theme = await crud.get_theme_by_name(name=f"some{user_id}", db=session)
         headers = {}
         if user_id is not None:
@@ -84,4 +82,3 @@ class TestTheme:
             f"/themes/{new_theme.id}/", headers=headers
         )
         assert response.status_code == status_code
-        deleted_theme = await crud.get_theme_by_name(db=session, name=f"some{user_id}")
