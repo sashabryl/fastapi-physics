@@ -213,6 +213,12 @@ async def delete_problem(
     return schemas.Success()
 
 
+async def delete_all_problems(db: AsyncSession):
+    stmt = delete(models.Problem)
+    await db.execute(stmt)
+    await db.commit()
+
+
 async def create_comment(
         problem_id: int,
         user: auth_models.User,

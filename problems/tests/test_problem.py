@@ -74,6 +74,6 @@ class TestProblem:
             "theme_id": theme_id
         }
         response = await client.post("/problems/", json=json, headers=headers)
-        print(response.text)
-        print(response.url)
         assert response.status_code == status_code
+
+    @pytest.mark.anyio()
