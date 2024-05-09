@@ -10,12 +10,12 @@ from aws import utils
 from auth.crud import get_current_user
 
 
-router_theme = APIRouter(tags=["Theme"])
-router_problem = APIRouter(tags=["Problem"])
-router_question = APIRouter(tags=["Question"])
+router_theme = APIRouter(tags=["Theme"], prefix="/themes")
+router_problem = APIRouter(tags=["Problem"], prefix="/problems")
+router_question = APIRouter(tags=["Question"], prefix="/questions")
 
 
-@router_theme.post("/themes/", response_model=schemas.Success)
+@router_theme.post("/", response_model=schemas.Success)
 async def create_theme(
         theme_schema: schemas.ThemeBase,
         user=Depends(get_current_user),
@@ -31,17 +31,17 @@ async def create_theme(
     return await crud.create_theme(db=db, theme_schema=theme_schema)
 
 
-@router_theme.get("/themes/", response_model=list[schemas.Theme])
+@router_theme.get("/", response_model=list[schemas.Theme])
 async def read_themes(db: AsyncSession = Depends(get_db)):
     return await crud.get_all_themes(db=db)
 
 
-@router_theme.get("/themes/{theme_id}/", response_model=schemas.Theme)
+@router_theme.get("/{theme_id}/", response_model=schemas.Theme)
 async def read_one_theme(theme_id: int, db: AsyncSession = Depends(get_db)):
     return await crud.get_theme_by_id(db=db, theme_id=theme_id)
 
 
-@router_theme.put("/themes/{theme_id}/", response_model=schemas.Theme)
+@router_theme.put("/{theme_id}/", response_model=schemas.Theme)
 async def update_theme(
         theme_id: int,
         theme_schema: schemas.ThemeBase,
@@ -55,7 +55,7 @@ async def update_theme(
     return await crud.update_theme(db=db, theme_id=theme_id, theme_schema=theme_schema)
 
 
-@router_theme.delete("/themes/{theme_id}/", response_model=schemas.Success)
+@router_theme.delete("/{theme_id}/", response_model=schemas.Success)
 async def delete_theme(
         theme_id: int,
         db: AsyncSession = Depends(get_db),
@@ -68,7 +68,7 @@ async def delete_theme(
     return await crud.delete_theme(db=db, theme_id=theme_id)
 
 
-@router_problem.post("/problems/", response_model=schemas.Success)
+@router_problem.post("/", response_model=schemas.Success)
 async def create_problem(
         problem_schema: schemas.ProblemCreate,
         db: AsyncSession = Depends(get_db),
@@ -77,12 +77,12 @@ async def create_problem(
     return await crud.create_problem(db=db, problem_schema=problem_schema, author=author)
 
 
-@router_problem.get("/problems/{problem_id}/", response_model=schemas.Problem)
+@router_problem.get("/{problem_id}/", response_model=schemas.Problem)
 async def read_one_problem(problem_id: int, db: AsyncSession = Depends(get_db)):
     return await crud.get_problem_by_id(db=db, problem_id=problem_id)
 
 
-@router_problem.get("/problems/", response_model=list[schemas.ProblemList])
+@router_problem.get("/", response_model=list[schemas.ProblemList])
 async def read_problems(
         theme_id: int = None,
         offset: int = Query(0, ge=0),
@@ -93,7 +93,7 @@ async def read_problems(
     return await crud.get_all_problems(offset=offset, limit=limit, theme_id=theme_id, keywords=keywords, db=db)
 
 
-@router_problem.post("/problems/{problem_id}/submit/", response_model=schemas.Success)
+@router_problem.post("/{problem_id}/submit/", response_model=schemas.Success)
 async def submit_problem_solution(
     problem_id: int,
     answer: Annotated[schemas.ProblemAnswer, Depends()],
@@ -108,7 +108,7 @@ async def submit_problem_solution(
 
 
 @router_problem.post(
-    "/problems/{problem_id}/upload-images/",
+    "/{problem_id}/upload-images/",
     response_model=schemas.Success
 )
 async def upload_explanation_images(
@@ -133,7 +133,7 @@ async def upload_explanation_images(
 
 
 @router_problem.get(
-    "/problems/{problem_id}/explanation/",
+    "/{problem_id}/explanation/",
     response_model=schemas.ProblemExplanation
 )
 async def read_problem_explanation(
@@ -149,7 +149,7 @@ async def read_problem_explanation(
     return await crud.get_problem_by_id(db=db, problem_id=problem_id)
 
 
-@router_problem.post("/problems/{problem_id}/comments/", response_model=schemas.Success)
+@router_problem.post("/{problem_id}/comments/", response_model=schemas.Success)
 async def create_comment(
         problem_id: int,
         body: str,
@@ -161,7 +161,7 @@ async def create_comment(
     return await crud.create_comment(problem_id=problem_id, body=body, user=user, db=db)
 
 
-@router_problem.get("/problems/{problem_id}/comments/", response_model=list[schemas.Comment])
+@router_problem.get("/{problem_id}/comments/", response_model=list[schemas.Comment])
 async def read_comments(
         problem_id: int,
         user = Depends(get_current_user),
@@ -173,7 +173,7 @@ async def read_comments(
     return await crud.get_all_comments(problem_id=problem.id, db=db)
 
 
-@router_problem.delete("/problems/{problem_id}/", response_model=schemas.Success)
+@router_problem.delete("/{problem_id}/", response_model=schemas.Success)
 async def delete_problem(
         problem_id: int,
         db: AsyncSession = Depends(get_db),
@@ -185,7 +185,7 @@ async def delete_problem(
 
 
 @router_problem.post(
-    "/problems/{problem_id}/comments/{comment_id}/like/",
+    "/{problem_id}/comments/{comment_id}/like/",
     response_model=schemas.Success
 )
 async def like_comment(
@@ -208,7 +208,7 @@ async def like_comment(
 
 
 @router_problem.post(
-    "/problems/{problem_id}/comments/{comment_id}/dislike/",
+    "/{problem_id}/comments/{comment_id}/dislike/",
     response_model=schemas.Success
 )
 async def dislike_comment(
@@ -231,7 +231,7 @@ async def dislike_comment(
 
 
 @router_problem.post(
-    "/problems/{problem_id}/comments/{comment_id}/responses/",
+    "/{problem_id}/comments/{comment_id}/responses/",
     response_model=schemas.Success
 )
 async def create_comment_response(
@@ -248,7 +248,7 @@ async def create_comment_response(
 
 
 @router_problem.get(
-    "/problems/{problem_id}/comments/{comment_id}/responses/",
+    "/{problem_id}/comments/{comment_id}/responses/",
     response_model=list[schemas.Comment]
 )
 async def read_comment_responses(
@@ -261,7 +261,7 @@ async def read_comment_responses(
 
 
 @router_problem.post(
-    "/problems/{problem_id}/comments/{comment_id}/responses/{response_id}/like/",
+    "/{problem_id}/comments/{comment_id}/responses/{response_id}/like/",
     response_model=schemas.Success
 )
 async def like_comment_response(
@@ -285,7 +285,7 @@ async def like_comment_response(
 
 
 @router_problem.post(
-    "/problems/{problem_id}/comments/{comment_id}/responses/{response_id}/dislike/",
+    "/{problem_id}/comments/{comment_id}/responses/{response_id}/dislike/",
     response_model=schemas.Success
 )
 async def dislike_comment_response(
@@ -356,13 +356,13 @@ async def create_question_response(
     return await crud.create_question_response(question=question, author=user, body=body, db=db)
 
 
-@router_question.get("/questions/{question_id}/responses/", response_model=list[schemas.Comment])
+@router_question.get("/{question_id}/responses/", response_model=list[schemas.Comment])
 async def read_question_responses(question_id: int, db: AsyncSession = Depends(get_db)):
     await crud.get_question_by_id(question_id=question_id, db=db)
     return await crud.get_all_question_responses(question_id=question_id, db=db)
 
 
-@router_question.post("/questions/{question_id}/responses/{response_id}/like/", response_model=schemas.Success)
+@router_question.post("/{question_id}/responses/{response_id}/like/", response_model=schemas.Success)
 async def like_question_response(
         question_id: int,
         response_id: int,
@@ -384,7 +384,7 @@ async def like_question_response(
     return schemas.Success()
 
 
-@router_question.post("/questions/{question_id}/responses/{response_id}/dislike/", response_model=schemas.Success)
+@router_question.post("/{question_id}/responses/{response_id}/dislike/", response_model=schemas.Success)
 async def dislike_question_response(
         question_id: int,
         response_id: int,
