@@ -1,5 +1,5 @@
 # FastAPI physics
-This is a platform for those who has questions to ask or love for solving physics problems, but sometimes get very stuck.
+This is a platform for those who have questions to ask or love solving physics problems, but sometimes get very stuck.
 
 ## The rules:
 * there are themes (Optics, Mechanics etc)
@@ -30,7 +30,7 @@ Visit /docs to see all the endpoints
 
 ## Testing
 Well, if you want to run tests, you first have to prepare you testing database in this way:
-* Run migrations is it as shown above
+* Run migrations in it as shown above
 * Add two users: first, with username test_user (id should be 1), and second, test_admin (id = 2)
 * Run ```pytest```
 
