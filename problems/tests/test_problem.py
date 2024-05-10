@@ -95,4 +95,3 @@ class TestProblem:
         assert response.status_code == status_code
         if problem_id == "real":
             assert response.json().get("name") == problems[0].name
-
