@@ -297,7 +297,7 @@ async def dislike_comment_response(
 ):
     if not user:
         raise HTTPException(401, "Authentication error")
-    if not user.score >= 20:
+    if not user.score >= 100:
         raise HTTPException(
             403, "Your score needs to be 20 or higher before you can like anything"
         )
@@ -350,8 +350,6 @@ async def create_question_response(
 ):
     if not user:
         raise HTTPException(401, "Authentication error")
-    if not user.score >= 30:
-        raise HTTPException(401, "Please go and complete some more problems first")
     question = await crud.get_question_by_id(question_id=question_id, db=db)
     return await crud.create_question_response(question=question, author=user, body=body, db=db)
 
@@ -393,7 +391,7 @@ async def dislike_question_response(
 ):
     if not user:
         raise HTTPException(401, "Authentication error")
-    if not user.score >= 20:
+    if not user.score >= 100:
         raise HTTPException(403, f"First gain at least 20 scores.")
     await crud.get_question_by_id(question_id=question_id, db=db)
     question_response = await crud.get_question_response_by_id(question_response_id=response_id, db=db)
